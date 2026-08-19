@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>KoJa 데모</title>
+  <style>
+    body { font: 17px/2 system-ui, sans-serif; max-width: 42em; margin: 3em auto; padding: 0 1em; }
+    h1 { font-size: 1.4em; } h2 { font-size: 1.05em; margin-top: 2em; color: #666; }
+    .trap { background: #fff8e1; padding: .8em 1em; border-left: 3px solid #fc0; }
+    input, textarea { width: 100%; padding: .5em; font: inherit; margin: .3em 0; }
+  </style>
+</head>
+<body>
+<h1>KoJa 데모 페이지</h1>
+
+<div id="koja-demo-body">
+  <h2>1. 평범한 문장 — 여기가 치환된다</h2>
+  <p>오늘 아침에 학교 앞 카페에서 친구를 만났다. 시간이 없어서 커피만 마시고
+     바로 회사로 갔다. 다음 주에 시험이 있어서 도서관에서 공부할 계획이다.</p>
+  <p>어제는 백화점에서 쇼핑을 했다. 가방과 우산을 샀고, 저녁에는 가족과 식사를 했다.
+     날씨가 좋아서 공원을 산책했고, 사진도 많이 찍었다.</p>
+  <p>내년에는 일본으로 여행을 갈 생각이다. 비행기 표와 호텔을 미리 예약해야 한다.
+     지하철과 버스를 타고 다니면서 음식을 먹어 볼 예정이다.</p>
+
+  <h2>2. 최장 일치 함정 — 여기가 쪼개지면 버그다 (§4.5)</h2>
+  <p class="trap">
+    아주머니가 물고기를 샀다. 할아버지는 수요일에 화장실을 고쳤다.
+    나이프로 소고기를 썰었다. 대학생과 고등학생이 노래방에 갔다.
+    할머니가 여름방학에 목소리를 높였다.
+  </p>
+
+  <h2>3. 경계 함정 — 여기가 치환되면 버그다 (§5.1)</h2>
+  <p class="trap">
+    경제학 개론 수업은 2시간 걸렸다. 신경제 정책과 10년간의 기록,
+    3주말 연속 근무, 반의사 결정.
+  </p>
+
+  <h2>4. 별칭 · 붙여 쓴 형태 (§4.3)</h2>
+  <p class="trap">생선을 구웠다. 이번달 목표. 빨래를 널었다. 찻집에서 만나자. 다음 주에 보자.</p>
+
+  <h2>5. 제외 영역 — 여기는 절대 안 바뀐다 (§6.1)</h2>
+  <p>아래 입력창에 <b>시간</b>, <b>학교</b>를 직접 쳐 보고 글자가 그대로인지 본다.</p>
+  <input type="text" placeholder="여기에 시간 학교 경제 를 입력해 보세요">
+  <textarea rows="3">여기 있는 시간과 학교와 경제는 절대 바뀌면 안 된다.</textarea>
+  <pre>pre 안의 시간 학교 경제 도 바뀌면 안 된다</pre>
+  <p><code>code 안의 시간 학교</code> 도 마찬가지다.</p>
+  <div contenteditable="true" style="border:1px solid #ccc;padding:.5em">
+    contenteditable 안의 시간 학교 경제 — 바뀌면 안 된다
+  </div>
+</div>
+</body>
+</html>
