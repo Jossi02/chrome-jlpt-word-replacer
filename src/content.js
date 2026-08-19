@@ -27,7 +27,18 @@ window.KOJA = window.KOJA || {};
       if (!state.root) state.root = KOJA.scope.getRoot(document);
       if (!state.root) { console.warn('[KoJa] 본문을 찾지 못했다'); return; }   // §8.5
 
-      var step = KOJA.matcher.densityStep(state.settings.density);
+      // 설정이 깨졌으면(undefined·null·문자열) densityStep 이 NaN 이나 Infinity 로 접혀
+      // 아무것도 안 바뀌는데 콘솔도 조용하다. 단서를 남기고 멈춘다 (§8.5)
+      var density = state.settings.density;
+      if (typeof density !== 'number' || !isFinite(density)) {
+        console.warn('[KoJa] density 설정이 올바르지 않다 — 치환하지 않는다', density);
+        return;
+      }
+
+      // §F2 · D1-A4 — JS 에서 0 % Infinity === 0 이라 이 가드가 없으면 밀도 0% 에서
+      // 첫 후보가 항상 통과한다. 0% 는 사용자의 정상 선택이므로 조용히 0건으로 끝낸다
+      var step = KOJA.matcher.densityStep(density);
+      if (!isFinite(step)) return;
 
       KOJA.scope.eachTextNode(state.root, function (node) {
         if (state.total >= MAX_REPLACEMENTS) return;
