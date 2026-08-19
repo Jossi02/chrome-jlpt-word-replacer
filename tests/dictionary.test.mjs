@@ -62,6 +62,17 @@ test('생성물 정합 — dictionary.js 가 dictionary.json 과 같다', () => 
   assert.deepEqual(JSON.parse(m[1]), dict);
 });
 
+// 위 테스트는 텍스트를 정규식으로 파싱할 뿐이라 "스크립트로 실제 로드되는가" 는 보지 못한다.
+// manifest 가 이 파일을 콘텐츠 스크립트로 싣는다 — 실행해서 전역이 붙는지까지 확인한다.
+// globalThis 를 더럽히지 않으려고 window 를 인자로 넘겨 샌드박스에 받는다.
+test('생성물 로드 — dictionary.js 가 스크립트로 실행돼 window.KOJA_DICT 를 붙인다', () => {
+  const sandbox = {};
+  new Function('window', read('../data/dictionary.js')).call(sandbox, sandbox);
+  assert.ok(Array.isArray(sandbox.KOJA_DICT), 'window.KOJA_DICT 가 배열이 아님');
+  assert.equal(sandbox.KOJA_DICT.length, 648);
+  assert.deepEqual(sandbox.KOJA_DICT, dict);
+});
+
 test('생성물 정합 — substring-pairs.json 이 재계산과 같다 (74쌍)', () => {
   const keys = dict.flatMap(e => e.match).sort((a, b) => a.length - b.length);
   const calc = [];

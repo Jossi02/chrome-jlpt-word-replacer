@@ -96,7 +96,7 @@
 - [x] 조사가 붙은 형태(`long + '를'`)에서도 긴 쪽이 이긴다
 - [x] `node --test` → `# fail 0`
 - [ ] 실패하면: `pairs.sort` 누락 또는 alternation 순서 확인
-- [x] `git commit -m "test(matcher): substring-pairs 74쌍 자동 전개"`
+- [ ] `git commit -m "test(matcher): substring-pairs 74쌍 자동 전개"`
 - [x] ✅ 테스트 이름에 **`부분 문자열 74쌍`** 이라는 숫자가 찍혀 초록으로 지나간다
 
 ### D1-A4 밀도 결정성 — **A** *(선행: A3)*
@@ -104,7 +104,7 @@
 - [x] 러닝 카운터 시맨틱 테스트 — 노드 3개·후보 6개, step 2 → `['a','c','e']` *(노드별 리셋이면 `['a','c','d']` 가 되어 틀린다)*
 - [x] 같은 입력이면 항상 같은 출력 (결정성)
 - [x] `node --test` → `# fail 0`
-- [x] `git commit -m "test(matcher): 밀도 러닝 카운터 + 결정성 고정"`
+- [ ] `git commit -m "test(matcher): 밀도 러닝 카운터 + 결정성 고정"`
 - [ ] **B에게 러닝 카운터 시맨틱을 말로 전달** *(D2-3에서 `content.js`가 이대로 구현해야 한다)*
 - [x] ✅ `밀도 — 러닝 카운터` 테스트 초록
 
