@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment": "레인 C (데이터·셸·UI · @Jossi02) 용. .claude/settings.local.json 으로 복사해서 쓴다. 이 파일은 커밋되지 않는다. 통합자라 deny 가 없다. 대신 훅이 모든 수정을 기록한다.",
+  "_generated": "node .claude/gen-lane-settings.mjs — 손으로 고치지 말고 owners.json 을 고친다",
+  "env": {
+    "KOJA_LANE": "C"
+  },
+  "permissions": {
+    "deny": []
+  }
+}
