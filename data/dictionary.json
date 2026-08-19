@@ -249,8 +249,7 @@
   "pos": "noun",
   "ruby": true,
   "match": [
-   "겉옷",
-   "상의"
+   "겉옷"
   ]
  },
  {
@@ -1428,18 +1427,6 @@
   "ruby": true,
   "match": [
    "업무"
-  ]
- },
- {
-  "id": 119,
-  "kanji": "辞書",
-  "reading": "じしょ",
-  "korean": "사전",
-  "level": "N5",
-  "pos": "noun",
-  "ruby": true,
-  "match": [
-   "사전"
   ]
  },
  {
@@ -7337,18 +7324,6 @@
   "ruby": true,
   "match": [
    "계기"
-  ]
- },
- {
-  "id": 610,
-  "kanji": "考慮",
-  "reading": "こうりょ",
-  "korean": "고려",
-  "level": "N1",
-  "pos": "noun",
-  "ruby": true,
-  "match": [
-   "고려"
   ]
  },
  {

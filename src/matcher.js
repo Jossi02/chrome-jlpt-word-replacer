@@ -64,6 +64,11 @@ window.KOJA = window.KOJA || {};
         if (m[0].length === 0) c.re.lastIndex++;   // 빈 매치 무한 루프 방지
         continue;
       }
+      // D3-2 실측 오탐(docs/misfires.md 1-1) — "-는 바람에"는 관용구(원인)이지 날씨의
+      // 바람이 아니다. 일반 규칙으로는 구분할 수 없는 좁은 예외라 이 자리에서만 걸러낸다.
+      if (m[1] === '바람' && text.slice(Math.max(0, m.index - 2), m.index) === '는 ' && m[2] === '에') {
+        continue;
+      }
       // 앞쪽 lookbehind 가 zero-width 이므로 m.index 가 곧 그룹1의 시작이다
       out.push({ start: m.index, length: m[1].length, surface: m[1], entry: c.index.get(m[1]) });
     }

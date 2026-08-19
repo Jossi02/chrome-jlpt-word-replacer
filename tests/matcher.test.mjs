@@ -177,3 +177,13 @@ test('Important3 — 오염된 maxLevel 은 전 레벨 통과가 아니라 N5 �
   assert.equal(matcher.findMatches(text, dict, {}).length, 0, 'maxLevel 없음');
   assert.equal(matcher.findMatches(text, dict).length, 0, 'opts 없음');
 });
+
+// D3-2 실측 오탐 — 위키백과 「국호」 단락에서 발견 (docs/misfires.md 1-1)
+test('실측 오탐 — 관용구 "-는 바람에" 는 바람(날씨)으로 치환되지 않는다', () => {
+  assert.ok(!hit('잘못 기록하는 바람에 나라 이름이 되었다').includes('바람'));
+});
+
+test('바람(날씨)은 관용구가 아니면 정상적으로 치환된다', () => {
+  assert.deepEqual(hit('바람이 분다'), ['바람']);
+  assert.ok(hit('복숭아 향기가 바람을 타고 흘러왔다').includes('바람'));
+});

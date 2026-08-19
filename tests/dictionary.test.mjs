@@ -10,11 +10,11 @@ const KANJI  = /[一-鿿]/;
 const KANA   = /^[぀-ゟ゠-ヿーー]+$/;
 const HANGUL = /^[가-힣][가-힣 ]*$/;
 
-test('사전 규모 — SPEC 4.1', () => {
-  assert.equal(dict.length, 648);
+test('사전 규모 — SPEC 4.1 (D3-2 오탐 제거 반영: 646)', () => {
+  assert.equal(dict.length, 646);
   const lv = {};
   for (const e of dict) lv[e.level] = (lv[e.level] || 0) + 1;
-  assert.deepEqual(lv, { N5: 328, N4: 105, N3: 95, N2: 70, N1: 50 });
+  assert.deepEqual(lv, { N5: 327, N4: 105, N3: 95, N2: 70, N1: 49 });
 });
 
 test('불변식 1·2 — 한국어 표제어 · 일본어 표기 중복 0', () => {
@@ -35,7 +35,7 @@ test('불변식 3·4·5·6 — 공백 · 가나 · 한글 · 복수뜻', () => {
 
 test('불변식 7 — ruby 플래그가 kanji 와 정합', () => {
   for (const e of dict) assert.equal(e.ruby, KANJI.test(e.kanji), `${e.id} ${e.kanji}`);
-  assert.equal(dict.filter(e => e.ruby).length, 544);
+  assert.equal(dict.filter(e => e.ruby).length, 542);
   assert.equal(dict.filter(e => !e.ruby).length, 104);
 });
 
@@ -51,7 +51,7 @@ test('불변식 8 — match 배열 · 한 글자 금지 · 전역 충돌 0', () 
       surf.set(m, e.id);
     }
   }
-  assert.equal(surf.size, 680);
+  assert.equal(surf.size, 677);
 });
 
 // 경로 B(Python 미설치) 대비 — 생성물이 정본과 어긋나면 즉시 잡는다
@@ -69,7 +69,7 @@ test('생성물 로드 — dictionary.js 가 스크립트로 실행돼 window.KO
   const sandbox = {};
   new Function('window', read('../data/dictionary.js')).call(sandbox, sandbox);
   assert.ok(Array.isArray(sandbox.KOJA_DICT), 'window.KOJA_DICT 가 배열이 아님');
-  assert.equal(sandbox.KOJA_DICT.length, 648);
+  assert.equal(sandbox.KOJA_DICT.length, 646);
   assert.deepEqual(sandbox.KOJA_DICT, dict);
 });
 
