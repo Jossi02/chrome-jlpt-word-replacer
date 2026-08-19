@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/hooks/post-edit-check.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit-check.mjs\"",
             "timeout": 20,
             "statusMessage": "문법 검사 중..."
           }
@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/hooks/stop-review-gate.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-review-gate.mjs\"",
             "timeout": 180,
             "statusMessage": "테스트 + 리뷰 게이트 실행 중..."
           }

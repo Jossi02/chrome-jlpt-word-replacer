@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "KoJa",
+  "version": "0.1.0",
+  "description": "한국어 웹페이지의 명사를 일본어로 치환해 노출량을 만든다",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "src/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "data/dictionary.js",
+        "src/matcher.js",
+        "src/scope.js",
+        "src/replacer.js",
+        "src/tooltip.js",
+        "src/content.js"
+      ],
+      "css": ["src/content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
