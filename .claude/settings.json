@@ -7,9 +7,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/hooks/post-edit-check.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit-check.mjs\"",
             "timeout": 20,
             "statusMessage": "문법 검사 중..."
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/owner-guard.mjs\"",
+            "timeout": 10,
+            "statusMessage": "소유권 확인 중..."
           }
         ]
       }
@@ -19,12 +25,21 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/hooks/stop-review-gate.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-review-gate.mjs\"",
             "timeout": 180,
             "statusMessage": "테스트 + 리뷰 게이트 실행 중..."
           }
         ]
       }
+    ]
+  },
+  "permissions": {
+    "_comment": "레인별 deny 는 .claude/lane-templates/<레인>.json 을 settings.local.json 으로 복사해서 건다. 여기는 3인 공통분만 둔다.",
+    "ask": [
+      "Edit(CLAUDE.md)",
+      "Edit(OWNERS.md)",
+      "Edit(SPEC.md)",
+      "Edit(plan.md)"
     ]
   }
 }
