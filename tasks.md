@@ -20,16 +20,16 @@
 
 ## P0-1 저장소 골격 · 인터페이스 껍데기 — **C** 주도, 전원 배석
 
-- [ ] `mkdir -p data tools src tests demo/backup` · `git init`
-- [ ] `build_dictionary.py` → `tools/` 로 이동 *(안 옮기면 `ROOT` 계산이 깨져 사전을 못 찾는다)*
-- [ ] `dictionary.json` · `dictionary.js` · `substring-pairs.json` → `data/` 로 이동
-- [ ] `package.json` 생성 — `"scripts": { "test": "node --test" }`, **`"type": "module"` 넣지 않기**
-- [ ] `.gitignore` 생성
-- [ ] `src/matcher.js` 스텁 커밋 *(B가 이 위에서 바로 시작한다)*
-- [ ] `src/scope.js` · `replacer.js` · `tooltip.js` · `content.js` · `content.css` 빈 껍데기 커밋
-- [ ] **3인이 plan.md「인터페이스 계약」절을 같이 읽고 시그니처에 합의**
-- [ ] `git commit -m "chore: SPEC 8.1 파일 구조로 정리 + 인터페이스 껍데기"`
-- [ ] ✅ `ls data src tools tests demo` 가 SPEC §8.1 트리와 같다 · `node --check src/matcher.js` 조용히 통과
+- [x] `mkdir -p data tools src tests demo/backup` · `git init`
+- [x] `build_dictionary.py` → `tools/` 로 이동 *(안 옮기면 `ROOT` 계산이 깨져 사전을 못 찾는다)*
+- [x] `dictionary.json` · `dictionary.js` · `substring-pairs.json` → `data/` 로 이동
+- [x] `package.json` 생성 — `"scripts": { "test": "node --test" }`, **`"type": "module"` 넣지 않기**
+- [x] `.gitignore` 생성
+- [x] `src/matcher.js` 스텁 커밋 *(B가 이 위에서 바로 시작한다)*
+- [x] `src/scope.js` · `replacer.js` · `tooltip.js` · `content.js` · `content.css` 빈 껍데기 커밋
+- [x] **3인이 plan.md「인터페이스 계약」절을 같이 읽고 시그니처에 합의**
+- [x] `git commit -m "chore: SPEC 8.1 파일 구조로 정리 + 인터페이스 껍데기"`
+- [x] ✅ `ls data src tools tests demo` 가 SPEC §8.1 트리와 같다 · `node --check src/matcher.js` 조용히 통과
 
 ## P0-2 사전 파이프라인 — **C**
 
@@ -44,13 +44,13 @@
 ## P0-3 함정 낭독 · 로드 리허설 · 시연 페이지 — **전원**
 
 - [ ] SPEC §0 결정 4건 · §8.3 함정 4건 · §10.1 축소 순서를 **소리 내어** 같이 읽기 (10분)
-- [ ] `chrome://extensions` → 개발자 모드 ON → 압축해제 로드 → `c:\wordprogram`
-- [ ] 확장 세부정보 → **"파일 URL에 대한 액세스 허용" ON**
-- [ ] `npx --yes http-server -p 8000 .` 로 로컬 서버를 기본 경로로 확정
+- [x] `chrome://extensions` → 개발자 모드 ON → 압축해제 로드 → `C:\chrome-jlpt-word-replacer` *(경로가 `c:\wordprogram`에서 바뀌었다 — 리포 구조 정리 이후 실제 로드 위치로 갱신)*
+- [x] 확장 세부정보 → **"파일 URL에 대한 액세스 허용" ON**
+- [x] `npx --yes http-server -p 8000 .` 로 로컬 서버를 기본 경로로 확정 *(`http://localhost:8000/demo/sample.html` 정상 렌더링 확인)*
 - [ ] 시연 사이트 2번(위키백과) URL 확정 → `demo/backup/wiki.html` 로 저장 *(Ctrl+S → 웹페이지, 완전)*
 - [ ] 시연 사이트 3번(블로그/뉴스) URL 확정 → `demo/backup/blog.html` 로 저장
 - [ ] **심사 평가 기준표가 있는지 교수에게 확인** *(있으면 그것이 §9를 대체한다 — 3일의 성공 기준이 바뀐다)*
-- [ ] ✅ KoJa 카드에 오류 배지 없음 · 파일 URL 허용 ON · `demo/backup/` 에 HTML 2개
+- [ ] ✅ KoJa 카드에 오류 배지 없음 · 파일 URL 허용 ON · `demo/backup/` 에 HTML 2개 *(카드 상태는 확인됨, backup 2종만 남음)*
 
 ### 🚩 P0 게이트 — 3인 전원 위 항목 체크 완료
 
@@ -62,51 +62,51 @@
 
 ### D1-A1 테스트 하네스 + 사전 불변식 — **A**
 
-- [ ] `tests/dictionary.test.mjs` 작성 — 규모(648 / N5 328·N4 105·N3 95·N2 70·N1 50)
-- [ ] 불변식 1·2 — 한국어 표제어 · 일본어 표기 중복 0
-- [ ] 불변식 3·4·5·6 — 앞뒤 공백 · `reading` 가나 · `korean` 한글 · 복수뜻/괄호 0
-- [ ] 불변식 7 — `ruby` 플래그 정합 (544 / 104)
-- [ ] 불변식 8 — `match` 에 대표 포함 · 한 글자 표면형 0 · 전역 충돌 0 · 총 680
-- [ ] **생성물 정합** — `dictionary.js` 가 `dictionary.json` 과 같다 *(경로 B의 안전망)*
-- [ ] **생성물 정합** — `substring-pairs.json` 이 재계산과 같다 (74쌍)
-- [ ] `node --test` → `# fail 0`
-- [ ] `git commit -m "test: 사전 불변식 8종 + 생성물 정합"`
-- [ ] ✅ `# pass 7` · 일부러 `korean` 을 중복시키면 불변식 1이 **빨갛게 실패**한다(확인 후 되돌리기)
+- [x] `tests/dictionary.test.mjs` 작성 — 규모(648 / N5 328·N4 105·N3 95·N2 70·N1 50)
+- [x] 불변식 1·2 — 한국어 표제어 · 일본어 표기 중복 0
+- [x] 불변식 3·4·5·6 — 앞뒤 공백 · `reading` 가나 · `korean` 한글 · 복수뜻/괄호 0
+- [x] 불변식 7 — `ruby` 플래그 정합 (544 / 104)
+- [x] 불변식 8 — `match` 에 대표 포함 · 한 글자 표면형 0 · 전역 충돌 0 · 총 680
+- [x] **생성물 정합** — `dictionary.js` 가 `dictionary.json` 과 같다 *(경로 B의 안전망)*
+- [x] **생성물 정합** — `substring-pairs.json` 이 재계산과 같다 (74쌍)
+- [x] `node --test` → `# fail 0`
+- [x] `git commit -m "test: 사전 불변식 8종 + 생성물 정합"`
+- [x] ✅ `# pass 7` · 일부러 `korean` 을 중복시키면 불변식 1이 **빨갛게 실패**한다(확인 후 되돌리기)
 
 ### D1-A2 최장 일치 매처 — **A** *(선행: A1)*
 
-- [ ] `tests/matcher.test.mjs` 에 `loadMatcher()` 관용구 작성 — `globalThis.window = globalThis; new Function(src)()`
-- [ ] §5.3 케이스 8개 작성 — 경제가 / 경제학 / 신경제 / 2시간 / 아주머니 / 할아버지에게 / 수요일에 / 물고기를
-- [ ] 별칭 케이스 — `생선을` → `surface:'생선'` · `entry.kanji:'魚'` · `entry.korean:'물고기'`
-- [ ] 붙여 쓴 형태 — `이번달` → `今月` · 공백 표제어 `다음 주에`
-- [ ] `start`/`length` 가 조사를 뺀 표면형만 가리키는지
-- [ ] 레벨 누적 필터 — N5에서 N3 단어가 안 잡힌다
-- [ ] `densityStep` — 100→1 · 50→2 · 25→4 · 0→Infinity
-- [ ] `node --test` → **실패를 눈으로 확인** (스텁이므로 실패가 정상)
-- [ ] `src/matcher.js` 전면 교체 — `ORDER` / `BAD`(숫자·영문 포함) / `JOSA`(긴 것부터) / `compile` 캐시
-- [ ] `pairs.sort(길이 내림차순)` — 최장 우선 alternation
-- [ ] `findMatches` — `re.lastIndex = 0` · zero-length 방어 · `m.index`/`m[1].length`
-- [ ] `node --test` → `# fail 0`
-- [ ] `git commit -m "feat(matcher): 최장 일치 + 조사 + 경계 규칙"`
-- [ ] ✅ 콘솔 한 줄 실행으로 `아주머니가 왔다 → 아주머니→おばさん` / `경제학 개론 → (없음)` / `2시간 걸렸다 → (없음)` 를 **직접 눈으로**
+- [x] `tests/matcher.test.mjs` 에 `loadMatcher()` 관용구 작성 — `globalThis.window = globalThis; new Function(src)()`
+- [x] §5.3 케이스 8개 작성 — 경제가 / 경제학 / 신경제 / 2시간 / 아주머니 / 할아버지에게 / 수요일에 / 물고기를
+- [x] 별칭 케이스 — `생선을` → `surface:'생선'` · `entry.kanji:'魚'` · `entry.korean:'물고기'`
+- [x] 붙여 쓴 형태 — `이번달` → `今月` · 공백 표제어 `다음 주에`
+- [x] `start`/`length` 가 조사를 뺀 표면형만 가리키는지
+- [x] 레벨 누적 필터 — N5에서 N3 단어가 안 잡힌다
+- [x] `densityStep` — 100→1 · 50→2 · 25→4 · 0→Infinity
+- [x] `node --test` → **실패를 눈으로 확인** (스텁이므로 실패가 정상)
+- [x] `src/matcher.js` 전면 교체 — `ORDER` / `BAD`(숫자·영문 포함) / `JOSA`(긴 것부터) / `compile` 캐시
+- [x] `pairs.sort(길이 내림차순)` — 최장 우선 alternation
+- [x] `findMatches` — `re.lastIndex = 0` · zero-length 방어 · `m.index`/`m[1].length`
+- [x] `node --test` → `# fail 0`
+- [x] `git commit -m "feat(matcher): 최장 일치 + 조사 + 경계 규칙"`
+- [x] ✅ 콘솔 한 줄 실행으로 `아주머니가 왔다 → 아주머니→おばさん` / `경제학 개론 → (없음)` / `2시간 걸렸다 → (없음)` 를 **직접 눈으로**
 
 ### D1-A3 74쌍 자동 전개 — **A** *(선행: A2)*
 
-- [ ] `substring-pairs.json` 을 읽어 케이스로 전개 — 긴 쪽이 이기고 매치가 정확히 1개
-- [ ] 조사가 붙은 형태(`long + '를'`)에서도 긴 쪽이 이긴다
-- [ ] `node --test` → `# fail 0`
+- [x] `substring-pairs.json` 을 읽어 케이스로 전개 — 긴 쪽이 이기고 매치가 정확히 1개
+- [x] 조사가 붙은 형태(`long + '를'`)에서도 긴 쪽이 이긴다
+- [x] `node --test` → `# fail 0`
 - [ ] 실패하면: `pairs.sort` 누락 또는 alternation 순서 확인
 - [ ] `git commit -m "test(matcher): substring-pairs 74쌍 자동 전개"`
-- [ ] ✅ 테스트 이름에 **`부분 문자열 74쌍`** 이라는 숫자가 찍혀 초록으로 지나간다
+- [x] ✅ 테스트 이름에 **`부분 문자열 74쌍`** 이라는 숫자가 찍혀 초록으로 지나간다
 
 ### D1-A4 밀도 결정성 — **A** *(선행: A3)*
 
-- [ ] 러닝 카운터 시맨틱 테스트 — 노드 3개·후보 6개, step 2 → `['a','c','e']` *(노드별 리셋이면 `['a','c','d']` 가 되어 틀린다)*
-- [ ] 같은 입력이면 항상 같은 출력 (결정성)
-- [ ] `node --test` → `# fail 0`
+- [x] 러닝 카운터 시맨틱 테스트 — 노드 3개·후보 6개, step 2 → `['a','c','e']` *(노드별 리셋이면 `['a','c','d']` 가 되어 틀린다)*
+- [x] 같은 입력이면 항상 같은 출력 (결정성)
+- [x] `node --test` → `# fail 0`
 - [ ] `git commit -m "test(matcher): 밀도 러닝 카운터 + 결정성 고정"`
 - [ ] **B에게 러닝 카운터 시맨틱을 말로 전달** *(D2-3에서 `content.js`가 이대로 구현해야 한다)*
-- [ ] ✅ `밀도 — 러닝 카운터` 테스트 초록
+- [x] ✅ `밀도 — 러닝 카운터` 테스트 초록
 
 ## 레인 B — DOM
 
@@ -155,45 +155,45 @@
 
 ### D1-C1 `manifest.json` — **C**
 
-- [ ] MV3 · `permissions: ["storage"]` · `action.default_popup`
-- [ ] `js` 배열 **순서 고정**: `data/dictionary.js` → `matcher` → `scope` → `replacer` → `tooltip` → `content`
-- [ ] `css: ["src/content.css"]` · `run_at: "document_idle"` · `matches: ["<all_urls>"]`
-- [ ] 아이콘·`host_permissions` **넣지 않는다**
-- [ ] 압축해제 로드 → 카드에 **오류 배지 없음**
+- [x] MV3 · `permissions: ["storage"]` · `action.default_popup`
+- [x] `js` 배열 **순서 고정**: `data/dictionary.js` → `matcher` → `scope` → `replacer` → `tooltip` → `content`
+- [x] `css: ["src/content.css"]` · `run_at: "document_idle"` · `matches: ["<all_urls>"]`
+- [x] 아이콘·`host_permissions` **넣지 않는다**
+- [x] 압축해제 로드 → 카드에 **오류 배지 없음**
 - [ ] `git commit -m "feat: MV3 manifest"`
-- [ ] ✅ 아무 페이지 콘솔에서 `KOJA_DICT.length` → **648** · `Object.keys(KOJA)` 에 모듈 이름들
+- [x] ✅ 아무 페이지 콘솔에서 `KOJA_DICT.length` → **648** · `Object.keys(KOJA)` 에 모듈 이름들
 
 ### D1-C2 `demo/sample.html` — **C** *(선행: C1)*
 
-- [ ] `#koja-demo-body` 래퍼 + 평범한 문단 3개 *(치환이 잘 되는 구간)*
-- [ ] 함정 상자 2 — 최장 일치: 아주머니 · 물고기 · 할아버지 · 수요일 · 화장실 · 나이프 · 소고기 · 대학생 · 노래방 · 여름방학 · 목소리
-- [ ] 함정 상자 3 — 경계: 경제학 · 2시간 · 신경제 · 10년간 · 3주말
-- [ ] 함정 상자 4 — 별칭/붙여쓰기: 생선 · 이번달 · 빨래 · 찻집 · 다음 주
-- [ ] 제외 영역 상자 5 — `input` · `textarea` · `pre` · `code` · `contenteditable`
-- [ ] `npx --yes http-server -p 8000 .` 로 확인
+- [x] `#koja-demo-body` 래퍼 + 평범한 문단 3개 *(치환이 잘 되는 구간)*
+- [x] 함정 상자 2 — 최장 일치: 아주머니 · 물고기 · 할아버지 · 수요일 · 화장실 · 나이프 · 소고기 · 대학생 · 노래방 · 여름방학 · 목소리
+- [x] 함정 상자 3 — 경계: 경제학 · 2시간 · 신경제 · 10년간 · 3주말
+- [x] 함정 상자 4 — 별칭/붙여쓰기: 생선 · 이번달 · 빨래 · 찻집 · 다음 주
+- [x] 제외 영역 상자 5 — `input` · `textarea` · `pre` · `code` · `contenteditable`
+- [x] `npx --yes http-server -p 8000 .` 로 확인
 - [ ] `git commit -m "feat(demo): 샘플 페이지 — 함정 케이스 내장"`
-- [ ] ✅ 1번 문단은 일본어로 · 3번 상자의 「경제학」「2시간」은 **한국어 그대로** · 5번 상자 전부 **한국어 그대로**
+- [ ] ✅ 1번 문단은 일본어로 · 3번 상자의 「경제학」「2시간」은 **한국어 그대로** · 5번 상자 전부 **한국어 그대로** *(matcher/scope/replacer가 아직 스텁이라 현재는 미치환 — A·B 완료 후 재확인)*
 
 ### D1-C3 `popup.html` / `popup.js` — **C** *(선행: C1)*
 
-- [ ] `popup.html` — 체크박스 2개(`enabled`/`furigana`) · `select`(N5~N1, 누적 개수 표기) · `range`(0~100, step 5) · 밀도 % 표시
-- [ ] **인라인 `<script>` 금지** — `popup.js` 별도 파일 *(MV3 CSP)*
-- [ ] `popup.js` — `DEFAULTS = { enabled:true, furigana:true, level:'N5', density:100 }`
-- [ ] `chrome.storage.local.get(DEFAULTS, ...)` 로 초기값 복원
-- [ ] 각 컨트롤 이벤트 → `chrome.storage.local.set` *(`tabs.sendMessage` 금지)*
+- [x] `popup.html` — 체크박스 2개(`enabled`/`furigana`) · `select`(N5~N1, 누적 개수 표기) · `range`(0~100, step 5) · 밀도 % 표시
+- [x] **인라인 `<script>` 금지** — `popup.js` 별도 파일 *(MV3 CSP)*
+- [x] `popup.js` — `DEFAULTS = { enabled:true, furigana:true, level:'N5', density:100 }`
+- [x] `chrome.storage.local.get(DEFAULTS, ...)` 로 초기값 복원
+- [x] 각 컨트롤 이벤트 → `chrome.storage.local.set` *(`tabs.sendMessage` 금지)*
 - [ ] `git commit -m "feat(popup): 토글2 + 레벨 + 밀도 → storage.local"`
-- [ ] ✅ 밀도 40% · 레벨 N3 으로 바꾸고 팝업을 닫았다 다시 열면 **값이 그대로** · `chrome.storage.local.get(console.log)` 로 4키 확인
+- [x] ✅ 밀도 40% · 레벨 N3 으로 바꾸고 팝업을 닫았다 다시 열면 **값이 그대로** · `chrome.storage.local.get(console.log)` 로 4키 확인
 
 ### D1-C4 `content.css` — **C** *(선행: B2)*
 
-- [ ] `.koja-word` 점선 밑줄 + `cursor: help`
-- [ ] `.koja-word ruby` — `ruby-position: over` · `line-height: 1`
-- [ ] `.koja-word rt` — `font-size:.55em` · **`display: revert`** · `opacity:1` · `visibility:visible` *(사이트 리셋 CSS 방어)*
-- [ ] `html.koja-no-furigana .koja-word rt { display: none }`
-- [ ] `#koja-tip` — `position:fixed` · `z-index:2147483647` · `pointer-events:none` · `display:none`
-- [ ] **확장 새로고침 + 페이지 새로고침**
+- [x] `.koja-word` 점선 밑줄 + `cursor: help`
+- [x] `.koja-word ruby` — `ruby-position: over` · `line-height: 1`
+- [x] `.koja-word rt` — `font-size:.55em` · **`display: revert`** · `opacity:1` · `visibility:visible` *(사이트 리셋 CSS 방어)*
+- [x] `html.koja-no-furigana .koja-word rt { display: none }`
+- [x] `#koja-tip` — `position:fixed` · `z-index:2147483647` · `pointer-events:none` · `display:none`
+- [x] **확장 새로고침 + 페이지 새로고침**
 - [ ] `git commit -m "feat(css): ruby · 후리가나 토글 · 툴팁 스타일"`
-- [ ] ✅ 점선 밑줄 + 한자 위 가나가 보인다 · 콘솔에서 `documentElement.classList.add('koja-no-furigana')` 하면 **가나가 즉시 사라진다**
+- [ ] ✅ 점선 밑줄 + 한자 위 가나가 보인다 · 콘솔에서 `documentElement.classList.add('koja-no-furigana')` 하면 **가나가 즉시 사라진다** *(치환된 `.koja-word`가 아직 없어 B의 replacer 연결 후 재확인)*
 
 ### 🚩 D1 종료 게이트 — 전원 15분 *(SPEC §10: 여기 못 가면 D2에 기능을 줄인다)*
 

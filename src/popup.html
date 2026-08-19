@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font: 14px/1.6 system-ui, sans-serif; width: 240px; margin: 0; padding: 14px; }
+    h1 { font-size: 15px; margin: 0 0 12px; }
+    .row { display: flex; align-items: center; justify-content: space-between; margin: 10px 0; }
+    .row label { user-select: none; }
+    input[type=range] { width: 100%; }
+    select { font: inherit; }
+    .val { color: #888; font-variant-numeric: tabular-nums; }
+    hr { border: 0; border-top: 1px solid #eee; margin: 12px 0; }
+  </style>
+</head>
+<body>
+  <h1>KoJa</h1>
+
+  <div class="row">
+    <label for="enabled">치환 켜기</label>
+    <input type="checkbox" id="enabled">
+  </div>
+  <div class="row">
+    <label for="furigana">후리가나 표시</label>
+    <input type="checkbox" id="furigana">
+  </div>
+
+  <hr>
+
+  <div class="row">
+    <label for="level">레벨 (누적)</label>
+    <select id="level">
+      <option value="N5">N5 · 328</option>
+      <option value="N4">N4 · 433</option>
+      <option value="N3">N3 · 528</option>
+      <option value="N2">N2 · 598</option>
+      <option value="N1">N1 · 648</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <label for="density">밀도</label>
+    <span class="val" id="density-val">100%</span>
+  </div>
+  <input type="range" id="density" min="0" max="100" step="5">
+
+  <script src="popup.js"></script>
+</body>
+</html>

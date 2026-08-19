@@ -308,7 +308,7 @@ git add data/ && git commit -m "chore: 사전 재빌드 — 불변식 8종 통�
 
 - [ ] **1. 소리 내어 같이 읽기 (10분)** — SPEC §0 결정 4건, §8.3 MV3 함정 4건, §10.1 축소 순서
 - [ ] **2. 지금 당장 확장을 한 번 로드해 본다** (내용이 비어 있어도 된다 — 로드 경로를 몸으로 익히는 게 목적)
-  - `chrome://extensions` → 우상단 **개발자 모드** ON → **압축해제된 확장 프로그램을 로드** → `c:\wordprogram`
+  - `chrome://extensions` → 우상단 **개발자 모드** ON → **압축해제된 확장 프로그램을 로드** → `C:\chrome-jlpt-word-replacer`
   - 해당 확장 카드 → **세부정보** → **"파일 URL에 대한 액세스 허용" ON** ← §8.3-(3)
 - [ ] **3. 로컬 http 서버를 기본 경로로 정한다** (파일 URL보다 안전하다)
 
@@ -583,10 +583,14 @@ window.KOJA = window.KOJA || {};
               '와','과','은','는','이','가','을','를','에','도','만','로','의','랑','나']
              .sort(function (a, b) { return b.length - a.length; });
 
-  var cache = Object.create(null);   // maxLevel -> {re, index}. 페이지당 최대 5개
+  // entries 배열 아이덴티티 -> { maxLevel: {re, index} }. 사전마다 슬롯이 분리된다.
+  // maxLevel 만 키로 쓰면 다른 사전을 같은 레벨로 부를 때 앞 호출 결과가 영구히 남는다.
+  var cache = new WeakMap();
 
   function compile(entries, maxLevel) {
-    if (cache[maxLevel]) return cache[maxLevel];
+    var byLevel = cache.get(entries);
+    if (!byLevel) { byLevel = Object.create(null); cache.set(entries, byLevel); }
+    if (byLevel[maxLevel]) return byLevel[maxLevel];
 
     var pairs = [];
     for (var i = 0; i < entries.length; i++) {
@@ -610,18 +614,26 @@ window.KOJA = window.KOJA || {};
     for (var k = 0; k < pairs.length; k++) {
       if (!index.has(pairs[k][0])) index.set(pairs[k][0], pairs[k][1]);
     }
-    cache[maxLevel] = { re: re, index: index };
-    return cache[maxLevel];
+    byLevel[maxLevel] = { re: re, index: index };
+    return byLevel[maxLevel];
   }
 
   function findMatches(text, entries, opts) {
-    var maxLevel = (opts && opts.maxLevel) || 'N5';
+    // 폴백 정책은 이 한 줄뿐이다. ORDER 에 없는 값(소문자·오타·인덱스 숫자·'constructor'
+    // 같은 프로토타입 키)은 '전 레벨 통과' 가 아니라 가장 안전한 N5 로 떨어진다
+    var want = opts && opts.maxLevel;
+    var maxLevel = (typeof ORDER[want] === 'number') ? want : 'N5';
     var c = compile(entries, maxLevel);
     var out = [], m;
     c.re.lastIndex = 0;                       // 'g' 정규식 재사용 시 필수
     while ((m = c.re.exec(text)) !== null) {
-      if (m[0].length === 0) { c.re.lastIndex++; continue; }   // 무한 루프 방지
-      // 뒤쪽 lookbehind 가 zero-width 이므로 m.index 가 곧 그룹1의 시작이다
+      // 표면형이 비면 유령 매치다. pairs 가 비어 그룹1이 '' 로 매치된 경우이고,
+      // 조사 그룹이 붙으면 m[0] 은 비지 않아 m[0] 기준 가드를 통과해 버린다
+      if (m[1].length === 0) {
+        if (m[0].length === 0) c.re.lastIndex++;   // 빈 매치 무한 루프 방지
+        continue;
+      }
+      // 앞쪽 lookbehind 가 zero-width 이므로 m.index 가 곧 그룹1의 시작이다
       out.push({ start: m.index, length: m[1].length, surface: m[1], entry: c.index.get(m[1]) });
     }
     return out;
@@ -633,24 +645,29 @@ window.KOJA = window.KOJA || {};
     return Math.max(1, Math.round(100 / density));
   }
 
-  KOJA.matcher = { compile: compile, findMatches: findMatches, densityStep: densityStep };
+  window.KOJA.matcher = {
+    compile: compile,
+    findMatches: findMatches,
+    densityStep: densityStep
+  };
 })();
 ```
 
-- [ ] **4. 통과 확인**
+- [x] **4. 통과 확인**
 
 ```bash
 node --test
 ```
 
-기대: `matcher.test.mjs` 전부 PASS.
+기대: `matcher.test.mjs` 전부 PASS. (PR #4로 병합됨 — `npm test` **31 pass / 0 fail**, 2026-08-19)
 
-> **이 코드는 계획 작성 시점에 실제 사전 648개로 검증했다.** §5.3 케이스 8개 전부 통과, 74쌍은 맨몸(`물고기`)·조사 붙은 형태(`물고기를`) 둘 다 실패 0건, 레벨 누적 필터·`densityStep`·`start`/`length` 정상.
-> 그대로 옮겨 적으면 통과한다. **통과하지 않으면 옮겨 적다가 뭔가 빠진 것이다** — 아래 세 곳을 먼저 본다.
+> **갱신 이력 (PR #4 리뷰, 2026-08-19):** 위 코드 블록은 D1-A2 실제 병합본으로 교체했다. 최초 초안과 3곳이 달라졌다 — ① `Object.create(null)` 단일 캐시 → `WeakMap` (entries 배열 아이덴티티별 슬롯 분리. 빈 사전으로 먼저 부른 뒤 정상 사전이 와도 캐시가 오염되지 않는다) ② `(opts && opts.maxLevel) || 'N5'` → `typeof ORDER[want] === 'number'` 가드 (소문자·오타·`'constructor'` 같은 값이 "전 레벨 통과"로 새지 않고 N5로 떨어진다 — fail-open이 아니라 fail-safe) ③ 가드가 `m[0].length===0`이 아니라 `m[1].length===0` + 조건부 `lastIndex++` (사전이 비어 그룹1이 빈 문자열로 매치되는 "유령 매치"를 막는다). `KOJA.matcher =` 도 `window.KOJA.matcher =`로 고쳤다 — 파일 최상단과 일치시킨다.
+> **더 이상 "그대로 옮겨 적으면 통과한다"가 아니다.** 위 블록은 이미 병합된 코드 그대로이므로 그대로 옮기면 통과하지만, 이 문서를 근거로 자체 구현을 새로 짤 경우 최초 초안(캐시가 `Object.create(null)`인 버전)으로는 27/30만 통과한다 — 반드시 위 최신 블록을 기준으로 삼는다.
 
 > **여기서 막히면 볼 곳.** ① `c.re.lastIndex = 0`을 빼면 두 번째 호출부터 결과가 사라진다.
 > ② lookbehind `(?<!...)`는 Node 24·Chrome 모두 지원한다 — 문법 오류가 나면 정규식 조립이 깨진 것이다.
 > ③ 「경제학」이 잡히면 뒤 lookahead가 조사 뒤가 아니라 표면형 뒤에 붙은 것이다.
+> ④ `compile`은 `KOJA.matcher`에 공개돼 있지만 **B·C는 직접 호출하지 않는다** — `findMatches`만 쓴다. 인터페이스 계약(§ 인터페이스 계약, `OWNERS.md`)에는 `findMatches`/`densityStep`만 정식으로 등재돼 있고, `compile`은 테스트가 캐시 무효화를 직접 검증하기 위한 내부 헬퍼다. `compile`을 직접 부르면 `maxLevel` 가드가 없어 잘못된 레벨 문자열이 그대로 캐시 슬롯 키가 된다(`findMatches`를 거치면 안전하다).
 
 - [ ] **5. 커밋**
 
@@ -1135,7 +1152,7 @@ git add src/content.js && git commit -m "feat(content): 3회 지연 스캔 + 첫
 > **`host_permissions`도 넣지 않는다.** 선언형 콘텐츠 스크립트만 쓰면 불필요하다(§8.6).
 
 - [ ] **2. 로드 + 확인**
-  - `chrome://extensions` → **압축해제된 확장 프로그램을 로드** → `c:\wordprogram`
+  - `chrome://extensions` → **압축해제된 확장 프로그램을 로드** → `C:\chrome-jlpt-word-replacer`
   - 카드에 **오류 배지가 없어야 한다.** 있으면 눌러서 메시지를 읽는다
   - 아무 페이지에서 F12 → 콘솔 → `KOJA_DICT.length` → **648**
 - [ ] **3. 커밋**
