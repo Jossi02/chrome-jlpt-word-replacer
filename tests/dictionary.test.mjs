@@ -80,3 +80,22 @@ test('생성물 정합 — substring-pairs.json 이 재계산과 같다 (74쌍)'
   assert.deepEqual(calc, pairs);
   assert.equal(pairs.length, 74);
 });
+
+// D3-2 회귀 방지 — 사전에서 엔트리를 빼면 popup.html 의 누적 개수도 같이 바뀌어야 한다.
+// 이 테스트가 없어서 646 으로 줄인 뒤에도 팝업이 648 을 계속 표시했다(스크린샷 작업에서 발견).
+test('팝업 레벨 개수가 사전 누적 개수와 정합', () => {
+  const html = read('../src/popup.html');
+  const ORDER = ['N5', 'N4', 'N3', 'N2', 'N1'];
+
+  const shown = new Map();
+  for (const m of html.matchAll(/<option value="(N[1-5])">\s*N[1-5][^\d]*(\d+)\s*<\/option>/g)) {
+    shown.set(m[1], Number(m[2]));
+  }
+  assert.deepEqual([...shown.keys()], ORDER, 'popup.html 의 option 이 N5→N1 순서로 5개가 아니다');
+
+  let acc = 0;
+  for (const lv of ORDER) {
+    acc += dict.filter(e => e.level === lv).length;
+    assert.equal(shown.get(lv), acc, `popup.html 의 ${lv} 표기(${shown.get(lv)})가 실제 누적(${acc})과 다르다`);
+  }
+});
