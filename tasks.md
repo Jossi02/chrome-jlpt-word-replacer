@@ -177,7 +177,7 @@
 
 ### D1-C3 `popup.html` / `popup.js` — **C** *(선행: C1)*
 
-- [x] `popup.html` — 체크박스 2개(`enabled`/`furigana`) · `select`(N5~N1, 누적 개수 표기) · `range`(0~100, step 5) · 밀도 % 표시
+- [x] `popup.html` — 체크박스 2개(`enabled`/`furigana`) · `select`(N5\~N1, 누적 개수 표기) · `range`(0\~100, step 5) · 밀도 % 표시
 - [x] **인라인 `<script>` 금지** — `popup.js` 별도 파일 *(MV3 CSP)*
 - [x] `popup.js` — `DEFAULTS = { enabled:true, furigana:true, level:'N5', density:100 }`
 - [x] `chrome.storage.local.get(DEFAULTS, ...)` 로 초기값 복원
