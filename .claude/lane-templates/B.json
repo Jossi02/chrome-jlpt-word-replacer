@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment": "레인 B (DOM · @hersmen98) 용. .claude/settings.local.json 으로 복사해서 쓴다. 이 파일은 커밋되지 않는다.",
+  "_generated": "node .claude/gen-lane-settings.mjs — 손으로 고치지 말고 owners.json 을 고친다",
+  "env": {
+    "KOJA_LANE": "B"
+  },
+  "permissions": {
+    "deny": [
+      "Edit(CLAUDE.md)",
+      "Edit(OWNERS.md)",
+      "Edit(SPEC.md)",
+      "Edit(plan.md)",
+      "Edit(src/matcher.js)",
+      "Edit(tests/**)",
+      "Edit(manifest.json)",
+      "Edit(package.json)",
+      "Edit(src/popup.html)",
+      "Edit(src/popup.js)",
+      "Edit(src/content.css)",
+      "Edit(data/**)",
+      "Edit(tools/**)",
+      "Edit(demo/**)",
+      "Edit(.claude/**)"
+    ]
+  }
+}
