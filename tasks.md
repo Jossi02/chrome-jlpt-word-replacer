@@ -62,51 +62,51 @@
 
 ### D1-A1 테스트 하네스 + 사전 불변식 — **A**
 
-- [ ] `tests/dictionary.test.mjs` 작성 — 규모(648 / N5 328·N4 105·N3 95·N2 70·N1 50)
-- [ ] 불변식 1·2 — 한국어 표제어 · 일본어 표기 중복 0
-- [ ] 불변식 3·4·5·6 — 앞뒤 공백 · `reading` 가나 · `korean` 한글 · 복수뜻/괄호 0
-- [ ] 불변식 7 — `ruby` 플래그 정합 (544 / 104)
-- [ ] 불변식 8 — `match` 에 대표 포함 · 한 글자 표면형 0 · 전역 충돌 0 · 총 680
-- [ ] **생성물 정합** — `dictionary.js` 가 `dictionary.json` 과 같다 *(경로 B의 안전망)*
-- [ ] **생성물 정합** — `substring-pairs.json` 이 재계산과 같다 (74쌍)
-- [ ] `node --test` → `# fail 0`
-- [ ] `git commit -m "test: 사전 불변식 8종 + 생성물 정합"`
-- [ ] ✅ `# pass 7` · 일부러 `korean` 을 중복시키면 불변식 1이 **빨갛게 실패**한다(확인 후 되돌리기)
+- [x] `tests/dictionary.test.mjs` 작성 — 규모(648 / N5 328·N4 105·N3 95·N2 70·N1 50)
+- [x] 불변식 1·2 — 한국어 표제어 · 일본어 표기 중복 0
+- [x] 불변식 3·4·5·6 — 앞뒤 공백 · `reading` 가나 · `korean` 한글 · 복수뜻/괄호 0
+- [x] 불변식 7 — `ruby` 플래그 정합 (544 / 104)
+- [x] 불변식 8 — `match` 에 대표 포함 · 한 글자 표면형 0 · 전역 충돌 0 · 총 680
+- [x] **생성물 정합** — `dictionary.js` 가 `dictionary.json` 과 같다 *(경로 B의 안전망)*
+- [x] **생성물 정합** — `substring-pairs.json` 이 재계산과 같다 (74쌍)
+- [x] `node --test` → `# fail 0`
+- [x] `git commit -m "test: 사전 불변식 8종 + 생성물 정합"`
+- [x] ✅ `# pass 7` · 일부러 `korean` 을 중복시키면 불변식 1이 **빨갛게 실패**한다(확인 후 되돌리기)
 
 ### D1-A2 최장 일치 매처 — **A** *(선행: A1)*
 
-- [ ] `tests/matcher.test.mjs` 에 `loadMatcher()` 관용구 작성 — `globalThis.window = globalThis; new Function(src)()`
-- [ ] §5.3 케이스 8개 작성 — 경제가 / 경제학 / 신경제 / 2시간 / 아주머니 / 할아버지에게 / 수요일에 / 물고기를
-- [ ] 별칭 케이스 — `생선을` → `surface:'생선'` · `entry.kanji:'魚'` · `entry.korean:'물고기'`
-- [ ] 붙여 쓴 형태 — `이번달` → `今月` · 공백 표제어 `다음 주에`
-- [ ] `start`/`length` 가 조사를 뺀 표면형만 가리키는지
-- [ ] 레벨 누적 필터 — N5에서 N3 단어가 안 잡힌다
-- [ ] `densityStep` — 100→1 · 50→2 · 25→4 · 0→Infinity
-- [ ] `node --test` → **실패를 눈으로 확인** (스텁이므로 실패가 정상)
-- [ ] `src/matcher.js` 전면 교체 — `ORDER` / `BAD`(숫자·영문 포함) / `JOSA`(긴 것부터) / `compile` 캐시
-- [ ] `pairs.sort(길이 내림차순)` — 최장 우선 alternation
-- [ ] `findMatches` — `re.lastIndex = 0` · zero-length 방어 · `m.index`/`m[1].length`
-- [ ] `node --test` → `# fail 0`
-- [ ] `git commit -m "feat(matcher): 최장 일치 + 조사 + 경계 규칙"`
-- [ ] ✅ 콘솔 한 줄 실행으로 `아주머니가 왔다 → 아주머니→おばさん` / `경제학 개론 → (없음)` / `2시간 걸렸다 → (없음)` 를 **직접 눈으로**
+- [x] `tests/matcher.test.mjs` 에 `loadMatcher()` 관용구 작성 — `globalThis.window = globalThis; new Function(src)()`
+- [x] §5.3 케이스 8개 작성 — 경제가 / 경제학 / 신경제 / 2시간 / 아주머니 / 할아버지에게 / 수요일에 / 물고기를
+- [x] 별칭 케이스 — `생선을` → `surface:'생선'` · `entry.kanji:'魚'` · `entry.korean:'물고기'`
+- [x] 붙여 쓴 형태 — `이번달` → `今月` · 공백 표제어 `다음 주에`
+- [x] `start`/`length` 가 조사를 뺀 표면형만 가리키는지
+- [x] 레벨 누적 필터 — N5에서 N3 단어가 안 잡힌다
+- [x] `densityStep` — 100→1 · 50→2 · 25→4 · 0→Infinity
+- [x] `node --test` → **실패를 눈으로 확인** (스텁이므로 실패가 정상)
+- [x] `src/matcher.js` 전면 교체 — `ORDER` / `BAD`(숫자·영문 포함) / `JOSA`(긴 것부터) / `compile` 캐시
+- [x] `pairs.sort(길이 내림차순)` — 최장 우선 alternation
+- [x] `findMatches` — `re.lastIndex = 0` · zero-length 방어 · `m.index`/`m[1].length`
+- [x] `node --test` → `# fail 0`
+- [x] `git commit -m "feat(matcher): 최장 일치 + 조사 + 경계 규칙"`
+- [x] ✅ 콘솔 한 줄 실행으로 `아주머니가 왔다 → 아주머니→おばさん` / `경제학 개론 → (없음)` / `2시간 걸렸다 → (없음)` 를 **직접 눈으로**
 
 ### D1-A3 74쌍 자동 전개 — **A** *(선행: A2)*
 
-- [ ] `substring-pairs.json` 을 읽어 케이스로 전개 — 긴 쪽이 이기고 매치가 정확히 1개
-- [ ] 조사가 붙은 형태(`long + '를'`)에서도 긴 쪽이 이긴다
-- [ ] `node --test` → `# fail 0`
+- [x] `substring-pairs.json` 을 읽어 케이스로 전개 — 긴 쪽이 이기고 매치가 정확히 1개
+- [x] 조사가 붙은 형태(`long + '를'`)에서도 긴 쪽이 이긴다
+- [x] `node --test` → `# fail 0`
 - [ ] 실패하면: `pairs.sort` 누락 또는 alternation 순서 확인
-- [ ] `git commit -m "test(matcher): substring-pairs 74쌍 자동 전개"`
-- [ ] ✅ 테스트 이름에 **`부분 문자열 74쌍`** 이라는 숫자가 찍혀 초록으로 지나간다
+- [x] `git commit -m "test(matcher): substring-pairs 74쌍 자동 전개"`
+- [x] ✅ 테스트 이름에 **`부분 문자열 74쌍`** 이라는 숫자가 찍혀 초록으로 지나간다
 
 ### D1-A4 밀도 결정성 — **A** *(선행: A3)*
 
-- [ ] 러닝 카운터 시맨틱 테스트 — 노드 3개·후보 6개, step 2 → `['a','c','e']` *(노드별 리셋이면 `['a','c','d']` 가 되어 틀린다)*
-- [ ] 같은 입력이면 항상 같은 출력 (결정성)
-- [ ] `node --test` → `# fail 0`
-- [ ] `git commit -m "test(matcher): 밀도 러닝 카운터 + 결정성 고정"`
+- [x] 러닝 카운터 시맨틱 테스트 — 노드 3개·후보 6개, step 2 → `['a','c','e']` *(노드별 리셋이면 `['a','c','d']` 가 되어 틀린다)*
+- [x] 같은 입력이면 항상 같은 출력 (결정성)
+- [x] `node --test` → `# fail 0`
+- [x] `git commit -m "test(matcher): 밀도 러닝 카운터 + 결정성 고정"`
 - [ ] **B에게 러닝 카운터 시맨틱을 말로 전달** *(D2-3에서 `content.js`가 이대로 구현해야 한다)*
-- [ ] ✅ `밀도 — 러닝 카운터` 테스트 초록
+- [x] ✅ `밀도 — 러닝 카운터` 테스트 초록
 
 ## 레인 B — DOM
 
