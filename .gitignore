@@ -1,3 +1,7 @@
 node_modules/
+dist/
+build/
+*.log
+.claude/settings.local.json
 .superpowers/
 .DS_Store
