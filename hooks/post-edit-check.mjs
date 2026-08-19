@@ -9,10 +9,15 @@ import { join, dirname, relative, extname, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR || process.cwd();
-const STATE = join(ROOT, '.claude', 'state', 'pending-review.json');
+const STATE = join(
+  tmpdir(),
+  'koja-hook-state',
+  Buffer.from(ROOT).toString('base64url'),
+  'pending-review.json'
+);
 
-const CODE_EXT = new Set(['.js', '.mjs', '.cjs', '.ts', '.json', '.html', '.css']);
-const IGNORE_DIRS = ['.claude', 'node_modules', '.git', 'dist', 'build'];
+const CODE_EXT = new Set(['.js', '.mjs', '.cjs', '.ts', '.py', '.json', '.html', '.css']);
+const IGNORE_DIRS = ['hooks', 'node_modules', '.git', 'dist', 'build'];
 
 function readStdin() {
   try { return JSON.parse(readFileSync(0, 'utf8') || '{}'); } catch { return {}; }
@@ -40,7 +45,7 @@ if (ext === '.json') {
   let target = filePath;
   let tmp = null;
   if (isESM && ext !== '.mjs') {
-    tmp = join(tmpdir(), `jlv-check-${process.pid}.mjs`);
+    tmp = join(tmpdir(), `koja-check-${process.pid}.mjs`);
     writeFileSync(tmp, src);
     target = tmp;
   }

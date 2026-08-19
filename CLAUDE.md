@@ -1,90 +1,90 @@
 # KoJa — 팀 공통 규칙
 
-> **이 파일은 통합자만 고친다.**
-> 기능을 추가한다고 여기에 줄을 더하지 않는다. 여기 남는 것은 **3인 전원 공통 사실**뿐이다.
-> 내 레인에만 해당하는 규칙은 그 레인 폴더의 `CLAUDE.md`에 쓴다.
+> 이 파일은 통합자만 수정한다. 기능별 세부 지침은 여기에 늘리지 않고 `plan.md`와 `tasks.md`에 둔다.
 
-## 이 프로젝트
+## 기준 문서
 
-한국어 웹페이지를 서핑하는 중 일부 명사를 일본어(한자+후리가나)로 치환해 노출시키는 Chrome 확장(MV3).
-목표는 의도적 암기가 아니라 **우연적 학습(incidental learning)** — 학습 기록·복습 기능은 의도적으로 없다.
+- `SPEC.md`: 제품 요구사항과 기술 결정의 단일 진실 공급원
+- `plan.md`: 파일 구조, 인터페이스 계약, 구현·검증 방법
+- `tasks.md`: 실행 순서와 담당별 체크리스트
+- 충돌 시 `SPEC.md` → `plan.md` → `tasks.md` 순으로 따른다.
 
-- 실행: `chrome://extensions` → 압축해제된 확장 로드 → 데모는 `python -m http.server`로 띄운 페이지에서 확인
-- 검증: `node --test`
+## 프로젝트
 
-**단일 진실 공급원은 [`SPEC.md`](SPEC.md)다.** 구현 판단이 SPEC과 충돌하면 SPEC을 따른다.
-근거 코드와 파일 구조는 [`plan.md`](plan.md), 잘게 쪼갠 체크리스트는 [`tasks.md`](tasks.md)에 있다.
-막히면 tasks.md → plan.md → SPEC.md 순으로 내려간다.
+한국어 웹페이지의 일부 명사를 일본어 표기와 후리가나로 치환하는 Chrome MV3 확장이다.
+런타임 네트워크 호출, 번역 API, LLM, 학습 기록·복습 기능은 범위 밖이다.
+사전은 648개 엔트리와 680개 표면형으로 확정됐으며 `data/dictionary.json`이 정본이다.
 
-## 작업 시작 규칙 (중요)
+## 현재 상태
 
-**파일을 고치기 전에, 그 파일의 담당을 `tasks.md`「담당」절에서 확인한다.**
-그 파일이 든 폴더에 `CLAUDE.md`가 있으면 **그것도 먼저 읽는다.** 안 읽고 고치면 팀 약속을 어긴다.
+- P0-1 구조와 `window.KOJA` 인터페이스 껍데기가 준비돼 있다.
+- `src/matcher.js`는 3단어 walking skeleton이며 D1-A2에서 교체한다.
+- 나머지 `src/` 파일은 담당 단계에서 구현할 스텁이다.
+- `tests/`는 아직 비어 있어 `npm test` 결과가 현재 0 tests다.
+- 이 PC에는 Python이 없어 사전 빌드는 실행하지 못한다. 설치 전에는 사전 정본을 수정하지 않는다.
 
 ## 소유권
 
-| 레인 | 담당 파일 |
-|------|-----------|
-| **A** 로직 | `src/matcher.js`, `tests/**` |
-| **B** DOM | `src/scope.js`, `src/replacer.js`, `src/tooltip.js`, `src/content.js` |
-| **C** 데이터·셸·UI | `manifest.json`, `package.json`, `src/popup.html`, `src/popup.js`, `src/content.css`, `data/**`, `tools/**`, `demo/**` |
+| 레인 | 소유 파일 |
+|---|---|
+| A — 로직 | `src/matcher.js`, `tests/**` |
+| B — DOM | `src/scope.js`, `src/replacer.js`, `src/tooltip.js`, `src/content.js` |
+| C — 데이터·셸·UI | `manifest.json`, `package.json`, `src/popup.*`, `src/content.css`, `data/**`, `tools/**`, `demo/**` |
 
-- **내 담당 밖은 읽기만** 한다. 고칠 게 있으면 담당자에게 요청한다
-- 이 파일과 `SPEC.md`·`plan.md`는 **통합자만** 고친다. `tasks.md`는 각자 자기 항목만 체크한다
-- 그래도 뚫었으면 → `CHANGELOG-INBOX/`에 쪽지를 남기고 담당자에게 통보한다 (훅이 쪽지를 자동 생성한다)
+- 작업 전 `tasks.md`에서 담당과 선행 조건을 확인한다.
+- 담당 밖 파일은 읽기만 하고 변경은 소유자에게 요청한다.
+- `CLAUDE.md`, `SPEC.md`, `plan.md`는 통합자만 수정한다.
+- `tasks.md`는 자기 담당 항목만, 검증 출력을 직접 확인한 뒤 체크한다.
+- 인터페이스 계약을 바꾸기 전에는 3인 합의를 받는다.
 
-## 공통 약속
+## 필수 제약
 
-`plan.md`「인터페이스 계약」의 시그니처를 **그대로** 따른다. 병렬 개발이 성립하는 유일한 근거다.
-**바꾸려면 3인 합의가 필요하다** — 고치기 전에 사람에게 물어본다.
+- 콘텐츠 스크립트에서 `import`/`export`를 쓰지 않고 `window.KOJA`에 붙인다.
+- `manifest.json`의 로드 순서는 dictionary → matcher → scope → replacer → tooltip → content다.
+- 사전은 `window.KOJA_DICT` 번들로 읽으며 `fetch()`하지 않는다.
+- `data/dictionary.js`와 `data/substring-pairs.json`은 자동 생성물이므로 직접 편집하지 않는다.
+- 매칭 경계에는 한글·숫자·영문을 포함하고, 가장 긴 표면형을 먼저 매칭한다.
+- 밀도와 레벨 선택은 결정적이어야 하며 `Math.random()`을 쓰지 않는다.
+- 입력 요소, 코드, `contenteditable`, 숨김·제외 영역은 절대 치환하지 않는다.
+- 설정 통신은 `chrome.storage.onChanged` 하나로 통일하고 `tabs.sendMessage`를 쓰지 않는다.
+- 페이지당 치환은 200개 이하이며 스캔 전체를 `try/catch`로 보호한다.
+- 복원 뒤 부모를 `normalize()`해 원문을 무손실로 되돌린다.
+- MutationObserver는 자기 변경을 무시하고 끌 수 있는 상수로 둔다.
 
-| 약속 | 지금 값 |
-|------|---------|
-| 전역 네임스페이스 | 모든 `src/*.js`가 `window.KOJA = window.KOJA \|\| {};`로 시작 |
-| 매칭 | `KOJA.matcher.findMatches(text, entries, { maxLevel })` → `[{ start, length, surface, entry }]` |
-| 밀도 | `KOJA.matcher.densityStep(density)` → `number` (100→1, 50→2, 25→4, 0→Infinity) |
-| 본문 영역 | `KOJA.scope.getRoot(doc)` · `KOJA.scope.eachTextNode(root, fn)` |
-| 치환·복원 | `KOJA.replacer.applyMatches(textNode, picks)` · `KOJA.replacer.restoreAll(root)` |
-| 툴팁 | `KOJA.tooltip.init()` (멱등) |
-| 설정 스키마 | `chrome.storage.local` 최상위 4키 — `enabled` · `furigana` · `level` · `density` |
-| 치환 마크업 | `<span class="koja-word" data-ko data-kana>` (§8.4) |
+## 인터페이스 계약
 
-`surface`를 돌려주는 것이 계약의 핵심이다 — 툴팁과 복원이 둘 다 "페이지에 실제로 있던 글자"를 써야 한다.
+```text
+KOJA.matcher.findMatches(text, entries, { maxLevel }) -> [{ start, length, surface, entry }]
+KOJA.matcher.densityStep(density) -> 100:1, 50:2, 25:4, 0:Infinity
+KOJA.scope.getRoot(doc) -> Element|null
+KOJA.scope.eachTextNode(root, fn) -> void
+KOJA.replacer.applyMatches(textNode, picks) -> number
+KOJA.replacer.restoreAll(root) -> number
+KOJA.tooltip.init() -> void (멱등)
+```
 
-## 기술 스택 · 제약 (전원 공통)
+`surface`는 페이지에서 실제로 매칭된 문자열이며 툴팁의 `data-ko`와 복원에 그대로 사용한다.
 
-- **Chrome Manifest V3**, 선언형 콘텐츠 스크립트만 사용(`host_permissions` 불필요, `<all_urls>` 경고는 발표에서 선제 설명).
-- 선언형 콘텐츠 스크립트는 **ES 모듈(`import`/`export`)을 지원하지 않는다.** 파일을 `manifest.json`의
-  `js` 배열에 순서대로 나열하고 `window.KOJA` 전역에 붙여 공유한다.
-- 사전은 `fetch()`가 아니라 `.js` 번들로 읽는다 — 비동기·`web_accessible_resources` 문제를 피하기 위함.
-- `file://` 페이지에서는 콘텐츠 스크립트가 기본 비활성 — 데모는 반드시 HTTP로 띄운다.
-- 코드 수정 후에는 **확장 새로고침 + 페이지 새로고침 둘 다** 필요하다 (탭에는 옛 스크립트가 남는다).
-- 로직은 순수 함수로 뺀다(`matcher.js` 등). DOM/확장 API에 붙는 부분은 얇은 껍질로 남기고 테스트 대상에서 제외한다.
-- `data/dictionary.json`이 정본이고 `data/dictionary.js`·`data/substring-pairs.json`은
-  `tools/build_dictionary.py`가 자동 생성한다 — **`.js`와 `.json`을 손으로 동시에 고치지 않는다.**
-- 사전 648개는 감사를 통과해 확정됐다(SPEC §0.3) — 임의로 항목을 더하거나 빼지 않는다. 불변식 8종은 SPEC §4.5.
-- 테스트는 `node --test`. `build_dictionary.py`는 실행 전 로컬 Python 유무를 확인한다 —
-  **이 PC에는 Python이 없다**(plan.md P0-2의 경로 B 케이스).
+## 디렉터리
 
-## 현재 상태 — 착수 전 (P0)
+```text
+data/   사전 정본과 생성물
+tools/  사전 검증·빌드
+src/    콘텐츠 스크립트, 팝업, CSS
+tests/  사전·매처 Node 테스트
+demo/   시연 페이지와 로컬 백업
+agents/ 위임용 에이전트 정의
+hooks/  문법 검사와 종료 리뷰 게이트 소스
+```
 
-`tasks.md` 진행판이 전부 미체크다. `src/`·`data/`·`tools/`·`tests/`·`demo/`가 아직 없고 사전 산출물만
-저장소 루트에 평평하게 놓여 있다. **P0-1(저장소 골격 잡기)이 첫 작업이다** — plan.md「최종 파일 구조」대로
-파일을 옮기고 인터페이스 계약대로 빈 껍데기를 만든다.
+훅 설정 예시는 `settings.example.json`이다. Claude Code에서 활성화할 때만 `.claude/settings.json`으로 복사한다.
 
-## 서브에이전트 · 훅
+## 검증과 완료 기준
 
-`.claude/agents/implementer.md` — 태스크 하나를 TDD로 구현한다. 주의: 그 문서는 소문자 `spec.md`를
-참조하지만 실제 파일명은 **`SPEC.md`**다.
-
-- `PostToolUse`(Write|Edit): `post-edit-check.mjs` 문법 검사 · `owner-guard.mjs` 소유권 쪽지(사람마다 로컬 설정)
-- `Stop`: `stop-review-gate.mjs` 테스트 + 리뷰 게이트(180s). 세션을 끝낼 때 자동으로 돈다 — 실패하면 고친다
-
-## 하지 말 것
-
-- 이 파일(`CLAUDE.md`), `SPEC.md`, `plan.md` 수정 (통합자만)
-- 내 담당 밖 파일 수정 (위 소유권 표)
-- 자동 생성물(`data/dictionary.js`, `data/substring-pairs.json`) 직접 편집
-- 새 라이브러리 추가 — 먼저 사람에게 물어본다
-- SPEC §12는 미결이다. 임의로 확정하지 말고 가장 좁고 되돌리기 쉬운 선택을 한 뒤 가정을 명시한다
-- 3인·3일(18~27 인시) 제약이다. 기능을 줄여야 하면 tasks.md 맨 아래 "기능을 줄여야 할 때"를 따른다
+- 기본 검증: `npm test` 및 변경한 JavaScript에 `node --check <파일>`
+- 사전 변경 시: `PYTHONIOENCODING=utf-8 python tools/build_dictionary.py` 후 `npm test`
+- 브라우저 변경 시: 확장과 페이지를 모두 새로고침하고 콘솔 오류를 확인한다.
+- 입력창 보호, 결정성, 첫 등장만 치환, 3회 무손실 복원은 기능보다 우선한다.
+- 막히면 `tasks.md`의 30분 규칙과 기능 축소 순서를 따른다.
+- 완료 보고에는 변경 파일, 실행한 검증 명령, 실제 결과, 남은 미검증 영역을 적는다.
+- 커밋·푸시·배포는 사용자가 명시적으로 요청할 때만 한다.

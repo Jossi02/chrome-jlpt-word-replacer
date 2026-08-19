@@ -1,14 +1,20 @@
 #!/usr/bin/env node
 // Stop
-// 이번 턴에서 소스 파일이 바뀌었으면: 테스트 전체를 돌리고, 리뷰를 마칠 때까지 턴을 막는다.
-// "기능 하나 = 한 턴" 이므로 기능이 추가될 때마다 정확히 한 번 걸린다.
+// 이번 턴에서 KoJa 소스가 바뀌었으면 테스트 전체를 돌리고,
+// 현재 파일 구조와 인터페이스 계약에 대한 리뷰를 마칠 때까지 턴을 막는다.
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
+import { tmpdir } from 'node:os';
 import { resolveRunner } from './_runner.mjs';
 
 const ROOT = process.env.CLAUDE_PROJECT_DIR || process.cwd();
-const STATE = join(ROOT, '.claude', 'state', 'pending-review.json');
+const STATE = join(
+  tmpdir(),
+  'koja-hook-state',
+  Buffer.from(ROOT).toString('base64url'),
+  'pending-review.json'
+);
 
 function readStdin() {
   try { return JSON.parse(readFileSync(0, 'utf8') || '{}'); } catch { return {}; }
@@ -66,14 +72,15 @@ const reason = [
     ? '   - 실패한 테스트를 고칩니다. 테스트 쪽이 틀렸다고 판단되면 근거를 밝히고 테스트를 고칩니다.'
     : (runner
         ? '   - 통과했습니다. 이번에 바뀐 로직을 실제로 덮는 케이스가 있는지 확인하고, 없으면 추가합니다.'
-        : '   - 변경된 것이 순수 함수(특히 `src/matcher.js` 의 조사 분리)라면 `test/matcher.test.js` 를 만들고 `node --test` 로 돌립니다. SPEC §10 이 이 부분만은 자동 테스트할 값어치가 있다고 못박아 두었습니다.'),
+        : '   - 변경된 것이 순수 함수라면 `tests/dictionary.test.mjs` 또는 `tests/matcher.test.mjs`를 만들고 `npm test`로 실행합니다.'),
   '',
-  '2. 코드 리뷰 — 변경된 파일을 SPEC.md 와 대조합니다. 특히:',
-  '   - §4.3 단어당 첫 등장만 치환 (`replacedLemmas` 가 지연 재스캔 사이에 유지되는가)',
-  '   - §4.4 조사 처리 (긴 조사 우선 / 앞 글자가 한글이면 제외 / 목록 밖 글자가 뒤에 붙으면 치환 안 함)',
-  '   - §4.6 치환 대상 영역 (input·textarea·contenteditable 을 건드리지 않는가)',
-  '   - §8.5 에러 처리 (스캔 사이클 try/catch, 페이지당 치환 상한)',
-  '   - 모듈 경계: `matcher.js` 는 DOM 을 몰라야 한다 (SPEC §8.1)',
+  '2. 코드 리뷰 — `SPEC.md`, `plan.md`의 인터페이스 계약과 대조합니다. 특히:',
+  '   - A 경계: `src/matcher.js`는 DOM·Chrome API를 모르며 최장 일치·조사·경계 규칙을 지키는가',
+  '   - B 경계: 입력 요소와 제외 영역을 건드리지 않고, 복원 뒤 `normalize()`로 원문을 보존하는가',
+  '   - 오케스트레이션: 첫 등장 Set과 밀도 러닝 카운터가 지연 스캔 사이에 유지되는가',
+  '   - 안전성: 페이지당 치환 상한, 스캔 `try/catch`, MutationObserver 무한 루프 방어가 있는가',
+  '   - C 경계: 생성물 `data/dictionary.js`와 `data/substring-pairs.json`을 직접 편집하지 않았는가',
+  '   - 로딩 순서: `manifest.json`이 dictionary → matcher → scope → replacer → tooltip → content 순서인가',
   '   더 넓게 훑고 싶으면 `/code-review` 스킬을 쓰세요.',
   '',
   '3. 마무리 — 고친 것과 리뷰 결과를 2~3줄로 보고하고 턴을 끝냅니다. 문제가 없으면 "리뷰 통과"라고만 해도 됩니다.'
