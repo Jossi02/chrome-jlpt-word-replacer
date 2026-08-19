@@ -9,7 +9,7 @@
 
 | 구간 | 항목 | A | B | C | 게이트 |
 |---|---|---|---|---|---|
-| P0 | 12 | | | | ☐ P0 완료 *(백업 사이트 2개·교수 확인만 남음)* |
+| P0 | 12 | | | | ☐ P0 완료 *(교수 평가기준표 확인만 남음 — 백업 사이트 2개는 완료)* |
 | D1 | 46 | ☑ A1 ☑ A2 ☑ A3 ☑ A4 | ☑ B1 ☑ B2 ☑ B3 ☑ B4 | ☑ C1 ☑ C2 ☑ C3 ☑ C4 | ☑ **D1 게이트** |
 | D2 | 26 | | ☑ 2-1 ☑ 2-2 ☑ 2-3 ☑ 2-4 ☑ 2-5 | | ☑ **D2 게이트** |
 | D3 | 33 | | | | ☐ **출하** |
@@ -47,10 +47,10 @@
 - [x] `chrome://extensions` → 개발자 모드 ON → 압축해제 로드 → `C:\chrome-jlpt-word-replacer` *(경로가 `c:\wordprogram`에서 바뀌었다 — 리포 구조 정리 이후 실제 로드 위치로 갱신)*
 - [x] 확장 세부정보 → **"파일 URL에 대한 액세스 허용" ON**
 - [x] `npx --yes http-server -p 8000 .` 로 로컬 서버를 기본 경로로 확정 *(`http://localhost:8000/demo/sample.html` 정상 렌더링 확인)*
-- [ ] 시연 사이트 2번(위키백과) URL 확정 → `demo/backup/wiki.html` 로 저장 *(Ctrl+S → 웹페이지, 완전)*
-- [ ] 시연 사이트 3번(블로그/뉴스) URL 확정 → `demo/backup/blog.html` 로 저장
+- [x] 시연 사이트 2번(위키백과) URL 확정 → `demo/backup/wiki.html` 로 저장 *(`ko.wikipedia.org/wiki/대한민국` · 원본 HTML을 가져와 `<script>`/preload 태그를 제거하고 저장 — Ctrl+S 네이티브 저장 다이얼로그는 자동화로 조작할 수 없어 대체 방법 사용)*
+- [x] 시연 사이트 3번(블로그/뉴스) URL 확정 → `demo/backup/blog.html` 로 저장 *(다음뉴스 여행 섹션 기사 `v.daum.net/v/20260819075128916` — news.naver.com은 자동화 접근이 막혀 대체. 위와 같은 방법으로 저장)*
 - [ ] **심사 평가 기준표가 있는지 교수에게 확인** *(있으면 그것이 §9를 대체한다 — 3일의 성공 기준이 바뀐다)*
-- [ ] ✅ KoJa 카드에 오류 배지 없음 · 파일 URL 허용 ON · `demo/backup/` 에 HTML 2개 *(카드 상태는 확인됨, backup 2종만 남음)*
+- [x] ✅ KoJa 카드에 오류 배지 없음 · 파일 URL 허용 ON · `demo/backup/` 에 HTML 2개 — `http://localhost:8000/demo/backup/{wiki,blog}.html`로 열어 완전히 새 탭에서 확인: wiki 159개·blog 36개 치환, `document.scripts.length === 0`, 콘솔 메시지 0건
 
 ### 🚩 P0 게이트 — 3인 전원 위 항목 체크 완료
 
