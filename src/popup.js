@@ -17,6 +17,11 @@ chrome.storage.local.get(DEFAULTS, function (s) {
   el.level.value      = s.level;
   el.density.value    = s.density;
   el.densityVal.textContent = s.density + '%';
+  // 첫 실행이면 storage가 비어 있다 — 여기서 실제로 기록해 둔다.
+  // 안 쓰면 content.js가 첫 실행에 density/level 을 undefined로 읽어
+  // densityStep(undefined) === NaN 이 되고, 확장이 켜져 있는데도
+  // 콘솔 에러 없이 아무것도 치환되지 않는 무증상 실패로 이어진다.
+  chrome.storage.local.set(s);
 });
 
 function save(patch) { chrome.storage.local.set(patch); }
