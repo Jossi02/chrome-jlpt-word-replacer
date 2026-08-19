@@ -12,7 +12,7 @@
 |------|------|-----------|---------|
 | **A** 로직 | @kimminje2 | `src/matcher.js`<br>`tests/*.mjs` ⏳ | 문자열이 들어가 매치 목록이 나온다. DOM을 모른다. |
 | **B** DOM | @hersmen98 | `src/scope.js`<br>`src/replacer.js`<br>`src/tooltip.js`<br>`src/content.js` | 매치 목록을 화면에 넣고 무손실로 되돌린다. |
-| **C** 데이터·셸·UI<br>**= 통합자** | @Jossi02 | `manifest.json` ⏳ · `package.json`<br>`src/popup.html` ⏳ · `src/popup.js` ⏳<br>`src/content.css`<br>`data/**` · `tools/**` · `demo/**`<br>`.claude/**` | 확장이 로드되고, 팝업이 설정을 쓰고, 시연할 페이지가 있다. |
+| **C** 데이터·셸·UI<br>**= 통합자** | @Jossi02 | `manifest.json` · `package.json`<br>`src/popup.html` · `src/popup.js`<br>`src/content.css`<br>`data/**` · `tools/**` · `demo/**`<br>`.claude/**` | 확장이 로드되고, 팝업이 설정을 쓰고, 시연할 페이지가 있다. |
 
 ⏳ = 아직 저장소에 없는 파일. 만들 사람이 정해져 있다는 뜻이다.
 
@@ -142,12 +142,13 @@ python -m http.server 8000        # file:// 로 열면 콘텐츠 스크립트가
 2. `http://localhost:8000/demo/sample.html` 에서 일본어 단어가 보인다
 3. 콘솔 빨간 줄 **0**
 
-## 지금 상태 (P0-1 직후)
+## 지금 상태 (2026-08-19, D1 진행 중)
 
 | | 있다 | 없다 |
 |---|---|---|
-| A | `src/matcher.js` (3단어 walking skeleton) | `tests/**` — 비어 있어 `npm test` 가 **0 tests** |
-| B | `src/scope.js` · `replacer.js` · `tooltip.js` · `content.js` 스텁 | 내용 |
-| C | `data/**` · `tools/**` · `package.json` · `src/content.css` · `.claude/**` | `manifest.json` · `src/popup.*` · `demo/sample.html` |
+| A | `src/matcher.js` (3단어 walking skeleton, D1-A2에서 교체 예정) | `tests/**` — 비어 있어 `npm test` 가 **0 tests** |
+| B | `src/scope.js` · `replacer.js` · `tooltip.js` · `content.js` 스텁 | 내용 (`getRoot`/`eachTextNode`/`applyMatches`/`restoreAll` 등 전부 미구현) |
+| C | `manifest.json` · `data/**`(648/680 정합 확인됨) · `tools/**` · `package.json` · `src/popup.html`/`popup.js` · `src/content.css` · `demo/sample.html` · `.claude/**` | 없음 — D1-C1~C4 전부 작성·1차 검증 완료 |
 
-`manifest.json` 이 없으면 **확장을 로드할 수 없다.** 브라우저 검증은 그때까지 못 돈다.
+C는 브라우저에서 `KOJA_DICT.length === 648`, `Object.keys(KOJA)`에 `matcher/scope/replacer/tooltip` 확인됨 (콘솔 컨텍스트를 `top`이 아니라 확장 이름으로 바꿔야 보인다 — 콘텐츠 스크립트는 격리된 월드에서 돈다).
+데모 페이지에서 실제 치환은 아직 안 보인다 — A·B가 스텁이라 `content.js`가 스캔을 호출하지 않기 때문이다. D2-1(matcher 결합)까지는 정상 상태.

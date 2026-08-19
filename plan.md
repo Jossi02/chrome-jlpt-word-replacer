@@ -308,7 +308,7 @@ git add data/ && git commit -m "chore: 사전 재빌드 — 불변식 8종 통�
 
 - [ ] **1. 소리 내어 같이 읽기 (10분)** — SPEC §0 결정 4건, §8.3 MV3 함정 4건, §10.1 축소 순서
 - [ ] **2. 지금 당장 확장을 한 번 로드해 본다** (내용이 비어 있어도 된다 — 로드 경로를 몸으로 익히는 게 목적)
-  - `chrome://extensions` → 우상단 **개발자 모드** ON → **압축해제된 확장 프로그램을 로드** → `c:\wordprogram`
+  - `chrome://extensions` → 우상단 **개발자 모드** ON → **압축해제된 확장 프로그램을 로드** → `C:\chrome-jlpt-word-replacer`
   - 해당 확장 카드 → **세부정보** → **"파일 URL에 대한 액세스 허용" ON** ← §8.3-(3)
 - [ ] **3. 로컬 http 서버를 기본 경로로 정한다** (파일 URL보다 안전하다)
 
@@ -1135,7 +1135,7 @@ git add src/content.js && git commit -m "feat(content): 3회 지연 스캔 + 첫
 > **`host_permissions`도 넣지 않는다.** 선언형 콘텐츠 스크립트만 쓰면 불필요하다(§8.6).
 
 - [ ] **2. 로드 + 확인**
-  - `chrome://extensions` → **압축해제된 확장 프로그램을 로드** → `c:\wordprogram`
+  - `chrome://extensions` → **압축해제된 확장 프로그램을 로드** → `C:\chrome-jlpt-word-replacer`
   - 카드에 **오류 배지가 없어야 한다.** 있으면 눌러서 메시지를 읽는다
   - 아무 페이지에서 F12 → 콘솔 → `KOJA_DICT.length` → **648**
 - [ ] **3. 커밋**
