@@ -148,9 +148,9 @@ python -m http.server 8000        # file:// 로 열면 콘텐츠 스크립트가
 |---|---|---|
 | A | `src/matcher.js` **완성** (D1-A1~A4, PR #4 병합) · `tests/dictionary.test.mjs`·`tests/matcher.test.mjs` — `npm test` **31 pass / 0 fail** | — |
 | B | `src/scope.js` · `replacer.js` · `tooltip.js` · `content.js` 스텁 | 내용 (`getRoot`/`eachTextNode`/`applyMatches`/`restoreAll` 등 전부 미구현) |
-| C | `manifest.json` · `data/**`(648/680 정합 확인됨) · `tools/**` · `package.json` · `src/popup.html`/`popup.js` · `src/content.css` · `demo/sample.html` · `.claude/**` | 없음 — D1-C1~C4 전부 작성·1차 검증 완료 |
+| C | `manifest.json` · `data/**`(646/677 정합 확인됨) · `tools/**` · `package.json` · `src/popup.html`/`popup.js` · `src/content.css` · `demo/sample.html` · `.claude/**` | 없음 — D1-C1~C4 전부 작성·1차 검증 완료 |
 
-C는 브라우저에서 `KOJA_DICT.length === 648`, `Object.keys(KOJA)`에 `matcher/scope/replacer/tooltip` 확인됨 (콘솔 컨텍스트를 `top`이 아니라 확장 이름으로 바꿔야 보인다 — 콘텐츠 스크립트는 격리된 월드에서 돈다).
+C는 브라우저에서 `KOJA_DICT.length === 646`, `Object.keys(KOJA)`에 `matcher/scope/replacer/tooltip` 확인됨 (콘솔 컨텍스트를 `top`이 아니라 확장 이름으로 바꿔야 보인다 — 콘텐츠 스크립트는 격리된 월드에서 돈다).
 데모 페이지에서 실제 치환은 아직 안 보인다 — B가 스텁이라 `content.js`가 스캔을 호출하지 않기 때문이다. D2-1(matcher 결합)까지는 정상 상태.
 
 **PR #4 리뷰가 B(@hersmen98)에게 남긴 경고** (`content.js` 작성 전 필독, `plan.md` D1-B4/D2-2/D2-3 참고):

@@ -9,7 +9,7 @@
 
 **기술 스택:** Chrome MV3 · 브라우저 전역 스크립트(ES 모듈 금지) · `node --test` (Node 24) · Python 3 (사전 빌드 전용)
 
-**SPEC:** [SPEC.md](SPEC.md) v2.1 — 사전 확정 648개
+**SPEC:** [SPEC.md](SPEC.md) v2.2 — 사전 646개 (D3-2 실측 오탐 제거 반영)
 
 ---
 
@@ -105,8 +105,8 @@ manifest.json                    MV3 · C
 package.json                     { "test": "node --test" } · C
 SPEC.md / plan.md / tasks.md     문서
 
-data/dictionary.json             648 엔트리 · 정본(사람이 편집) · C
-data/dictionary.js               window.KOJA_DICT · 82.6 KB · 자동생성 · 편집금지
+data/dictionary.json             646 엔트리 · 정본(사람이 편집) · C
+data/dictionary.js               window.KOJA_DICT · 82.4 KB · 자동생성 · 편집금지
 data/substring-pairs.json        74쌍 · 자동생성 · 편집금지
 tools/build_dictionary.py        불변식 8종 검증 + 위 두 파일 생성 · C
 
@@ -254,7 +254,8 @@ git commit -m "chore: SPEC 8.1 파일 구조로 정리 + 인터페이스 껍데�
 > SPEC §10 D0의 `python tools/build_dictionary.py` 게이트가 여기서 막힌다.
 >
 > 동시에 확인한 것: **생성물 3종은 이미 정본과 완전히 정합하다.**
-> `dictionary.js` 82.6 KB · 648 엔트리 · 680 표면형 · ruby 544 / 가나 104 · 74쌍 — SPEC 수치와 전부 일치한다.
+> `dictionary.js` 82.4 KB · 646 엔트리 · 677 표면형 · ruby 542 / 가나 104 · 74쌍 — SPEC 수치와 전부 일치한다.
+> *(P0-2 시점 수치는 648/680/544 였다. D3-2 실측 오탐 제거로 바뀌었다 — SPEC v2.2)*
 > 즉 **막힌 것은 "재생성" 뿐이고 "현재 상태"는 건강하다.**
 
 - [ ] **1. 경로 A(권장) — Python 3 설치**
@@ -275,10 +276,10 @@ PYTHONIOENCODING=utf-8 python tools/build_dictionary.py
 
 ```
 OK — 불변식 8종 전부 통과
-  엔트리      : 648  (N5 328 / N4 105 / N3 95 / N2 70 / N1 50)
-  매칭 표면형 : 680  (대표 648 + 별칭 32)
-  ruby 대상   : 544  / 가나 전용 104
-  → data/dictionary.js (82.6 KB)
+  엔트리      : 646  (N5 327 / N4 105 / N3 95 / N2 70 / N1 49)
+  매칭 표면형 : 677  (대표 646 + 별칭 31)
+  ruby 대상   : 542  / 가나 전용 104
+  → data/dictionary.js (82.4 KB)
   → data/substring-pairs.json
 
 부분 문자열 쌍 74 건 — 최장 일치가 긴 쪽을 먼저 잡아야 하는 지점
@@ -294,10 +295,10 @@ OK — 불변식 8종 전부 통과
 - [ ] **4. 재생성됐다면 커밋**
 
 ```bash
-git add data/ && git commit -m "chore: 사전 재빌드 — 불변식 8종 통과 (648/680)"
+git add data/ && git commit -m "chore: 사전 재빌드 — 불변식 8종 통과 (646/677)"
 ```
 
-**✅ 눈으로 확인:** 터미널에 `OK — 불변식 8종 전부 통과`와 `엔트리 : 648`이 보인다. (경로 B면 이 확인을 D1-A1 통과로 대체한다.)
+**✅ 눈으로 확인:** 터미널에 `OK — 불변식 8종 전부 통과`와 `엔트리 : 646`이 보인다. (경로 B면 이 확인을 D1-A1 통과로 대체한다.)
 
 ---
 
@@ -372,10 +373,10 @@ const KANA   = /^[\u3040-\u309F\u30A0-\u30FF\u30FCー]+$/;
 const HANGUL = /^[가-힣][가-힣 ]*$/;
 
 test('사전 규모 — SPEC 4.1', () => {
-  assert.equal(dict.length, 648);
+  assert.equal(dict.length, 646);
   const lv = {};
   for (const e of dict) lv[e.level] = (lv[e.level] || 0) + 1;
-  assert.deepEqual(lv, { N5: 328, N4: 105, N3: 95, N2: 70, N1: 50 });
+  assert.deepEqual(lv, { N5: 327, N4: 105, N3: 95, N2: 70, N1: 49 });
 });
 
 test('불변식 1·2 — 한국어 표제어 · 일본어 표기 중복 0', () => {
@@ -396,7 +397,7 @@ test('불변식 3·4·5·6 — 공백 · 가나 · 한글 · 복수뜻', () => {
 
 test('불변식 7 — ruby 플래그가 kanji 와 정합', () => {
   for (const e of dict) assert.equal(e.ruby, KANJI.test(e.kanji), `${e.id} ${e.kanji}`);
-  assert.equal(dict.filter(e => e.ruby).length, 544);
+  assert.equal(dict.filter(e => e.ruby).length, 542);
   assert.equal(dict.filter(e => !e.ruby).length, 104);
 });
 
@@ -412,7 +413,7 @@ test('불변식 8 — match 배열 · 한 글자 금지 · 전역 충돌 0', () 
       surf.set(m, e.id);
     }
   }
-  assert.equal(surf.size, 680);
+  assert.equal(surf.size, 677);
 });
 
 // 경로 B(Python 미설치) 대비 — 생성물이 정본과 어긋나면 즉시 잡는다
@@ -1154,14 +1155,14 @@ git add src/content.js && git commit -m "feat(content): 3회 지연 스캔 + 첫
 - [ ] **2. 로드 + 확인**
   - `chrome://extensions` → **압축해제된 확장 프로그램을 로드** → `C:\chrome-jlpt-word-replacer`
   - 카드에 **오류 배지가 없어야 한다.** 있으면 눌러서 메시지를 읽는다
-  - 아무 페이지에서 F12 → 콘솔 → `KOJA_DICT.length` → **648**
+  - 아무 페이지에서 F12 → 콘솔 → `KOJA_DICT.length` → **646**
 - [ ] **3. 커밋**
 
 ```bash
 git add manifest.json && git commit -m "feat: MV3 manifest — 콘텐츠 스크립트 6개 순서 고정"
 ```
 
-**✅ 눈으로 확인:** 아무 웹페이지 콘솔에서 `KOJA_DICT.length` → `648`, `Object.keys(KOJA)` → `['matcher','scope','replacer',...]`. 사전 82.6 KB가 실제로 페이지에 들어와 있다는 증거다.
+**✅ 눈으로 확인:** 아무 웹페이지 콘솔에서 `KOJA_DICT.length` → `646`, `Object.keys(KOJA)` → `['matcher','scope','replacer',...]`. 사전 82.4 KB가 실제로 페이지에 들어와 있다는 증거다.
 
 ---
 
@@ -1292,11 +1293,11 @@ git add demo/sample.html && git commit -m "feat(demo): 샘플 페이지 — 함�
   <div class="row">
     <label for="level">레벨 (누적)</label>
     <select id="level">
-      <option value="N5">N5 · 328</option>
-      <option value="N4">N4 · 433</option>
-      <option value="N3">N3 · 528</option>
-      <option value="N2">N2 · 598</option>
-      <option value="N1">N1 · 648</option>
+      <option value="N5">N5 · 327</option>
+      <option value="N4">N4 · 432</option>
+      <option value="N3">N3 · 527</option>
+      <option value="N2">N2 · 597</option>
+      <option value="N1">N1 · 646</option>
     </select>
   </div>
 
@@ -1842,7 +1843,7 @@ git commit -am "fix: 실측 오탐 N건 제거 — 사전 M개 제외"
 | 1 | 원본 페이지를 연다 | "평소 보는 한국어 페이지입니다" |
 | 2 | 확장 on | "단어가 일본어로 바뀝니다. 한자 위 후리가나가 핵심입니다 — 한국인은 뜻은 알지만 읽는 법을 모릅니다(§0.1)" |
 | 3 | 마우스 오버 | "툴팁은 원본 단어와 읽기, 두 줄이 전부입니다. 뜻을 계속 보여주면 번역 경로를 강화하니까요(§1)" |
-| 4 | 레벨 N5→N3 | "328개에서 528개로 늘어납니다" |
+| 4 | 레벨 N5→N3 | "327개에서 527개로 늘어납니다" |
 | 5 | 밀도 슬라이더 | "Nation의 95~98% 커버리지 임계선을 사용자가 직접 정합니다(§1.1)" |
 | 6 | off | "완전히 원본으로 돌아옵니다" |
 
