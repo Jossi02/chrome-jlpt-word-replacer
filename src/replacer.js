@@ -6,6 +6,7 @@ window.KOJA = window.KOJA || {};
   function makeSpan(doc, surface, entry) {
     var span = doc.createElement('span');
     span.className = 'koja-word';
+    if (entry.falseFriend) span.classList.add('koja-false-friend');  // SPEC §1.2 — 한자음으로 읽으면 틀리는 단어
     span.setAttribute('data-ko', surface);          // 페이지에 실제로 있던 표면형 (§4.3 · §8.4)
     span.setAttribute('data-kana', entry.reading);
     if (entry.ruby) {

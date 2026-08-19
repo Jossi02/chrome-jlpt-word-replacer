@@ -3,6 +3,11 @@
   border-bottom: 1px dotted currentColor;
   cursor: help;
 }
+/* SPEC §1.2 거짓짝(false friend) — 한자음으로 읽으면 틀리는 단어. 밑줄 색만 다르다.
+   툴팁 내용·구조는 그대로다(F3 — 배지·문구 추가 금지) */
+.koja-word.koja-false-friend {
+  border-bottom-color: #e8590c;
+}
 .koja-word ruby {
   ruby-position: over;
   line-height: 1;

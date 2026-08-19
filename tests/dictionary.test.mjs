@@ -99,3 +99,17 @@ test('팝업 레벨 개수가 사전 누적 개수와 정합', () => {
     assert.equal(shown.get(lv), acc, `popup.html 의 ${lv} 표기(${shown.get(lv)})가 실제 누적(${acc})과 다르다`);
   }
 });
+
+// 거짓짝 경고(SPEC §1.2, 부록 C-6) — falseFriend 는 선택 필드이므로 있는 엔트리에서만 타입을 본다.
+test('불변식 — falseFriend 는 있으면 boolean true 만 (문자열·0·null 금지)', () => {
+  for (const e of dict) {
+    if (!('falseFriend' in e)) continue;
+    assert.equal(e.falseFriend, true, `${e.id}(${e.kanji}) falseFriend 는 true 이거나 필드 자체가 없어야 한다`);
+  }
+});
+
+test('거짓짝 — 「勉強」(id 296) 이 플래그돼 있다 (SPEC §1.2 예시)', () => {
+  const e = dict.find(x => x.id === 296);
+  assert.equal(e.kanji, '勉強');
+  assert.equal(e.falseFriend, true, '勉強 는 한국식 한자음(면강)으로 읽으면 틀리는 대표 사례인데 플래그가 없다');
+});

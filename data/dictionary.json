@@ -3566,6 +3566,7 @@
   "level": "N5",
   "pos": "noun",
   "ruby": true,
+  "falseFriend": true,
   "match": [
    "공부"
   ]
