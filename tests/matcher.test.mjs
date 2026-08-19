@@ -127,3 +127,53 @@ test('밀도 — 같은 입력이면 항상 같은 출력 (§F2 결정성)', () 
   assert.deepEqual(run(), run());
   assert.deepEqual(run(), [0, 3, 6, 9, 12, 15, 18]);
 });
+
+// ── 수정 라운드 1 — 리뷰 Important 1·2·3 ────────────────────────────────
+
+test('Important2 — compile 캐시는 entries 배열마다 분리된다', () => {
+  const only경제 = [dict.find(e => e.korean === '경제')];   // N4 한 개짜리 사전
+  const text = '경제가 시간이';
+  // 같은 maxLevel 이라도 사전 배열이 다르면 결과가 달라야 한다
+  assert.equal(matcher.findMatches(text, only경제, { maxLevel: 'N1' }).length, 1);
+  assert.equal(matcher.findMatches(text, dict,     { maxLevel: 'N1' }).length, 2);
+  // 순서를 바꿔도 같다 (캐시가 앞 호출에 오염되지 않는다)
+  assert.equal(matcher.findMatches(text, only경제, { maxLevel: 'N1' }).length, 1);
+});
+
+test('Important2 — 빈 사전으로 먼저 불러도 정상 사전이 영구 오염되지 않는다', () => {
+  // content.js 가 KOJA_DICT 로딩 전에 첫 호출을 하는 상황
+  assert.equal(matcher.findMatches('경제가', [],   { maxLevel: 'N2' }).length, 0);
+  assert.equal(matcher.findMatches('경제가', dict, { maxLevel: 'N2' }).length, 1);
+});
+
+test('Important1 — 빈 사전은 유령 매치를 만들지 않는다', () => {
+  // pairs 가 비면 정규식 그룹1이 빈 문자열로 매치되고, 조사 그룹만 붙어
+  // m[0] 은 비지 않으므로 m[0].length 가드를 통과해 버린다
+  assert.deepEqual(matcher.findMatches('나 는 좋다', [], { maxLevel: 'N1' }), []);
+});
+
+test('Important1 — 모든 매치는 surface 가 비지 않고 entry 가 있다', () => {
+  const texts = ['나 는 좋다', '를 을 에서', '경제가 시간이', '', '   '];
+  for (const entries of [[], dict]) {
+    for (const text of texts) {
+      for (const m of matcher.findMatches(text, entries, { maxLevel: 'N1' })) {
+        assert.ok(m.length > 0, `'${text}' 에서 length 0 매치 (start ${m.start})`);
+        assert.ok(m.surface.length > 0, `'${text}' 에서 빈 surface 매치`);
+        assert.ok(m.entry, `'${text}' 의 '${m.surface}' 에 entry 가 없다`);
+      }
+    }
+  }
+});
+
+test('Important3 — 오염된 maxLevel 은 전 레벨 통과가 아니라 N5 로 떨어진다', () => {
+  const text = '경제';                    // 경제 = N4. N5 에서는 잡히면 안 된다
+  assert.equal(matcher.findMatches(text, dict, { maxLevel: 'N4' }).length, 1);  // 정상값
+  assert.equal(matcher.findMatches(text, dict, { maxLevel: 'N5' }).length, 0);  // 정상 폴백 기준
+  // 아래는 전부 N5 로 떨어져야 한다 (현재는 필터가 통째로 죽어 N4 가 통과한다)
+  assert.equal(matcher.findMatches(text, dict, { maxLevel: 'n1' }).length, 0, '소문자');
+  assert.equal(matcher.findMatches(text, dict, { maxLevel: '쓰레기' }).length, 0, '미지의 문자열');
+  assert.equal(matcher.findMatches(text, dict, { maxLevel: 3 }).length, 0, '인덱스 숫자');
+  assert.equal(matcher.findMatches(text, dict, { maxLevel: 'constructor' }).length, 0, '프로토타입 키');
+  assert.equal(matcher.findMatches(text, dict, {}).length, 0, 'maxLevel 없음');
+  assert.equal(matcher.findMatches(text, dict).length, 0, 'opts 없음');
+});

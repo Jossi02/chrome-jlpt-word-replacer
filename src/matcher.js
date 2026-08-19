@@ -14,10 +14,14 @@ window.KOJA = window.KOJA || {};
               '와','과','은','는','이','가','을','를','에','도','만','로','의','랑','나']
              .sort(function (a, b) { return b.length - a.length; });
 
-  var cache = Object.create(null);   // maxLevel -> {re, index}. 페이지당 최대 5개
+  // entries 배열 아이덴티티 -> { maxLevel: {re, index} }. 사전마다 슬롯이 분리된다.
+  // maxLevel 만 키로 쓰면 다른 사전을 같은 레벨로 부를 때 앞 호출 결과가 영구히 남는다.
+  var cache = new WeakMap();
 
   function compile(entries, maxLevel) {
-    if (cache[maxLevel]) return cache[maxLevel];
+    var byLevel = cache.get(entries);
+    if (!byLevel) { byLevel = Object.create(null); cache.set(entries, byLevel); }
+    if (byLevel[maxLevel]) return byLevel[maxLevel];
 
     var pairs = [];
     for (var i = 0; i < entries.length; i++) {
@@ -41,17 +45,25 @@ window.KOJA = window.KOJA || {};
     for (var k = 0; k < pairs.length; k++) {
       if (!index.has(pairs[k][0])) index.set(pairs[k][0], pairs[k][1]);
     }
-    cache[maxLevel] = { re: re, index: index };
-    return cache[maxLevel];
+    byLevel[maxLevel] = { re: re, index: index };
+    return byLevel[maxLevel];
   }
 
   function findMatches(text, entries, opts) {
-    var maxLevel = (opts && opts.maxLevel) || 'N5';
+    // 폴백 정책은 이 한 줄뿐이다. ORDER 에 없는 값(소문자·오타·인덱스 숫자·'constructor'
+    // 같은 프로토타입 키)은 '전 레벨 통과' 가 아니라 가장 안전한 N5 로 떨어진다
+    var want = opts && opts.maxLevel;
+    var maxLevel = (typeof ORDER[want] === 'number') ? want : 'N5';
     var c = compile(entries, maxLevel);
     var out = [], m;
     c.re.lastIndex = 0;                       // 'g' 정규식 재사용 시 필수
     while ((m = c.re.exec(text)) !== null) {
-      if (m[0].length === 0) { c.re.lastIndex++; continue; }   // 무한 루프 방지
+      // 표면형이 비면 유령 매치다. pairs 가 비어 그룹1이 '' 로 매치된 경우이고,
+      // 조사 그룹이 붙으면 m[0] 은 비지 않아 m[0] 기준 가드를 통과해 버린다
+      if (m[1].length === 0) {
+        if (m[0].length === 0) c.re.lastIndex++;   // 빈 매치 무한 루프 방지
+        continue;
+      }
       // 앞쪽 lookbehind 가 zero-width 이므로 m.index 가 곧 그룹1의 시작이다
       out.push({ start: m.index, length: m[1].length, surface: m[1], entry: c.index.get(m[1]) });
     }
