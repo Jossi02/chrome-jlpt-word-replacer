@@ -21,6 +21,8 @@
       "Edit(data/**)",
       "Edit(tools/**)",
       "Edit(demo/**)",
+      "Edit(icon/**)",
+      "Edit(docs/**)",
       "Edit(.claude/**)"
     ]
   }
