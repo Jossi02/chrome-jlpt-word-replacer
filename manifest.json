@@ -3,9 +3,21 @@
   "name": "KoJa",
   "version": "0.1.0",
   "description": "한국어 웹페이지의 명사를 일본어로 치환해 노출량을 만든다",
+  "icons": {
+    "16": "icon/png/icon16.png",
+    "32": "icon/png/icon32.png",
+    "48": "icon/png/icon48.png",
+    "128": "icon/png/icon128.png"
+  },
   "permissions": ["storage"],
   "action": {
-    "default_popup": "src/popup.html"
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "icon/png/icon16.png",
+      "32": "icon/png/icon32.png",
+      "48": "icon/png/icon48.png",
+      "128": "icon/png/icon128.png"
+    }
   },
   "content_scripts": [
     {
