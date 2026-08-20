@@ -1,16 +1,22 @@
 {
+  "_comment": "manifest.json 에 이미 반영돼 있다 (PR #7). Chrome 이 읽는 파일이 아니라 참고용 사본이다.",
+  "_paths": "경로는 icon/png/ 다. icons/ 디렉터리는 존재하지 않는다 — 예전 판의 icons/iconNN.png 로 붙이면 Chrome 이 아이콘을 못 찾는다.",
+  "_action": "action 은 통째로 덮어쓰지 말 것. default_popup 이 같이 날아가면 팝업이 안 열린다. 그래서 아래에 함께 적어뒀다.",
+  "_256": "icon256.png 는 넣지 않는다. Chrome 은 16/32/48/128 만 쓴다 — 웹스토어 등록용 소스로만 남긴다.",
+
   "icons": {
-    "16": "icons/icon16.png",
-    "32": "icons/icon32.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icon/png/icon16.png",
+    "32": "icon/png/icon32.png",
+    "48": "icon/png/icon48.png",
+    "128": "icon/png/icon128.png"
   },
   "action": {
+    "default_popup": "src/popup.html",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "32": "icons/icon32.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16": "icon/png/icon16.png",
+      "32": "icon/png/icon32.png",
+      "48": "icon/png/icon48.png",
+      "128": "icon/png/icon128.png"
     }
   }
 }

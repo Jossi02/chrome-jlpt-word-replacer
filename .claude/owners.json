@@ -21,7 +21,7 @@
       "owns": [
         "manifest.json", "package.json",
         "src/popup.html", "src/popup.js", "src/content.css",
-        "data/**", "tools/**", "demo/**", ".claude/**"
+        "data/**", "tools/**", "demo/**", "icon/**", "docs/**", ".claude/**"
       ]
     }
   },

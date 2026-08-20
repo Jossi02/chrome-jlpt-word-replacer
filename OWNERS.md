@@ -12,7 +12,7 @@
 |------|------|-----------|---------|
 | **A** 로직 | @kimminje2 | `src/matcher.js`<br>`tests/*.mjs` ⏳ | 문자열이 들어가 매치 목록이 나온다. DOM을 모른다. |
 | **B** DOM | @hersmen98 | `src/scope.js`<br>`src/replacer.js`<br>`src/tooltip.js`<br>`src/content.js` | 매치 목록을 화면에 넣고 무손실로 되돌린다. |
-| **C** 데이터·셸·UI<br>**= 통합자** | @Jossi02 | `manifest.json` · `package.json`<br>`src/popup.html` · `src/popup.js`<br>`src/content.css`<br>`data/**` · `tools/**` · `demo/**`<br>`.claude/**` | 확장이 로드되고, 팝업이 설정을 쓰고, 시연할 페이지가 있다. |
+| **C** 데이터·셸·UI<br>**= 통합자** | @Jossi02 | `manifest.json` · `package.json`<br>`src/popup.html` · `src/popup.js`<br>`src/content.css`<br>`data/**` · `tools/**` · `demo/**`<br>`icon/**` · `docs/**` · `.claude/**` | 확장이 로드되고, 팝업이 설정을 쓰고, 시연할 페이지가 있다. |
 
 ⏳ = 아직 저장소에 없는 파일. 만들 사람이 정해져 있다는 뜻이다.
 
@@ -29,8 +29,12 @@
 ### 새 파일을 만들면
 
 파일 단위 소유권이라 **새 파일은 주인이 없는 상태로 태어난다.**
-`src/` 나 `tests/` 에 파일을 추가하면 **이 표에 한 줄 추가하도록 통합자에게 요청**한다.
+파일이든 폴더든 새로 만들면 **이 표에 한 줄 추가하도록 통합자에게 요청**한다.
 표에 없는 파일은 아무도 리뷰하지 않는다.
+
+특히 **새 최상위 폴더**가 조용히 빠진다. `icon/**` 과 `docs/**` 가 그렇게 한동안
+주인 없이 있었다 (PR #7). 표에 넣었으면 `.claude/owners.json` 도 같이 고치고
+템플릿을 다시 만든다 — 아래 「소유권이 바뀌면」.
 
 ## 규칙 3줄
 
@@ -48,8 +52,8 @@ cp .claude/lane-templates/A.json .claude/settings.local.json    # A/B/C 중 자�
 
 | 레인 | 파일 | 들어 있는 것 |
 |------|------|--------------|
-| A @kimminje2 | `.claude/lane-templates/A.json` | `deny` 17개 + `KOJA_LANE=A` |
-| B @hersmen98 | `.claude/lane-templates/B.json` | `deny` 15개 + `KOJA_LANE=B` |
+| A @kimminje2 | `.claude/lane-templates/A.json` | `deny` 19개 + `KOJA_LANE=A` |
+| B @hersmen98 | `.claude/lane-templates/B.json` | `deny` 17개 + `KOJA_LANE=B` |
 | C @Jossi02 (통합자) | `.claude/lane-templates/C.json` | `deny` 없음 + `KOJA_LANE=C` |
 
 C 에 `deny` 가 없는 것은 실수가 아니다. **통합자는 모든 파일을 고쳐야 한다.**

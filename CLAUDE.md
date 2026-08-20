@@ -34,7 +34,7 @@
 |---|---|---|
 | A — 로직 | @kimminje2 | `src/matcher.js`, `tests/**` |
 | B — DOM | @hersmen98 | `src/scope.js`, `src/replacer.js`, `src/tooltip.js`, `src/content.js` |
-| C — 데이터·셸·UI<br>= 통합자 | @Jossi02 | `manifest.json`, `package.json`, `src/popup.*`, `src/content.css`, `data/**`, `tools/**`, `demo/**`, `.claude/**` |
+| C — 데이터·셸·UI<br>= 통합자 | @Jossi02 | `manifest.json`, `package.json`, `src/popup.*`, `src/content.css`, `data/**`, `tools/**`, `demo/**`, `icon/**`, `docs/**`, `.claude/**` |
 
 - 작업 전 `OWNERS.md` 의 소유권 지도에서 담당을 확인한다. 선행 조건은 `tasks.md`.
 - 담당 밖 파일은 읽기만 하고 변경은 소유자에게 요청한다.
@@ -79,6 +79,8 @@ tools/   사전 검증·빌드
 src/     콘텐츠 스크립트, 팝업, CSS
 tests/   사전·매처 Node 테스트
 demo/    시연 페이지와 로컬 백업
+icon/    확장 아이콘 (svg 원본 + png 4종, 256은 웹스토어용)
+docs/    실측 기록·스크린샷·발표 덱
 .claude/ 팀 공용 하네스 — 아래 참조
 ```
 
