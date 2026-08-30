@@ -1,5 +1,9 @@
 # D3-1 실측 기록 — 3사이트 (2026-08-19)
 
+> **Historical manual validation:** 당시 사용한 외부 뉴스 기사 `demo/backup/blog.html` snapshot은
+> 2026-08-30 공개 hardening에서 current tree에서 제거했다. 아래 측정 결과와 경로는 당시 검증
+> provenance로 보존한다.
+
 > 조건: 레벨 **N1** · 밀도 **100%** (가장 많이 치환되는 조건, plan.md D3-1 지시대로)
 > 방법: Claude in Chrome 브라우저 자동화로 3사이트 전체 순회. 실측자: Claude(통합자 @Jossi02 대행, 사용자 확인 하에 진행)
 > 사이트: ① `demo/sample.html` ② 위키백과 `ko.wikipedia.org/wiki/대한민국` (+ 로컬 백업 `demo/backup/wiki.html` 교차 확인) ③ `demo/backup/blog.html` (다음뉴스 여행기사)

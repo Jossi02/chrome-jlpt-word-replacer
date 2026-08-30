@@ -2,7 +2,7 @@
 """
 build_dictionary.py — KoJa 사전 검증 · 빌드
 
-입력  : data/dictionary.json   (사람이 편집하는 정본. 648 엔트리)
+입력  : data/dictionary.json   (사람이 편집하는 정본. 646 엔트리)
 출력  : data/dictionary.js     (확장이 읽는 번들. window.KOJA_DICT)
         stdout 에 부분 문자열 쌍 목록 (matcher 테스트 케이스)
 

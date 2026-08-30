@@ -1,6 +1,7 @@
 # KoJa — 팀 공통 규칙
 
-> 이 파일은 통합자만 수정한다. 기능별 세부 지침은 여기에 늘리지 않고 `plan.md`와 `tasks.md`에 둔다.
+> 2026-08-19의 팀 규칙을 바탕으로 현재 동작과 검증 명령만 유지한다. 당시 세부 실행 기록은
+> `plan.md`와 `tasks.md`에 historical artifact로 남긴다.
 
 ## 기준 문서
 
@@ -18,30 +19,24 @@
 
 ## 현재 상태
 
-- P0-1 구조와 `window.KOJA` 인터페이스 껍데기가 준비돼 있다.
-- `src/matcher.js`는 3단어 walking skeleton이며 D1-A2에서 교체한다.
-- 나머지 `src/` 파일은 담당 단계에서 구현할 스텁이다.
-- `tests/`는 아직 비어 있어 `npm test` 결과가 현재 0 tests다.
-- 이 PC에는 Python이 없어 사전 빌드는 실행하지 못한다. 설치 전에는 사전 정본을 수정하지 않는다.
+- matcher, DOM scope/replacer/tooltip, content orchestration, popup이 구현돼 있다.
+- `npm test`는 현재 39개 계약을 검증한다.
+- Python 3.12 dictionary builder는 646 엔트리, 677 표면형, ruby 542, 부분 문자열 74쌍을 재생성한다.
+- `plan.md`와 `tasks.md`는 2026-08-19 해커톤의 historical development artifact다.
 
-## 소유권
+## 해커톤 당시 구현 ownership
 
-소유권 지도는 다음 줄로 **이 파일과 함께 자동으로 읽힌다.** 정본은 그쪽이다.
-
-@OWNERS.md
+`OWNERS.md`는 당시 3인 병렬 작업의 파일 분담과 협업 tooling을 보존한다. 현재 유지보수를 강제하는
+정책은 아니며, 실제 authorship은 Git/PR history와 함께 본다.
 
 | 레인 | 담당 | 소유 파일 |
 |---|---|---|
 | A — 로직 | @kimminje2 | `src/matcher.js`, `tests/**` |
 | B — DOM | @hersmen98 | `src/scope.js`, `src/replacer.js`, `src/tooltip.js`, `src/content.js` |
-| C — 데이터·셸·UI<br>= 통합자 | @Jossi02 | `manifest.json`, `package.json`, `src/popup.*`, `src/content.css`, `data/**`, `tools/**`, `demo/**`, `icon/**`, `docs/**`, `.claude/**` |
+| C — 데이터·셸·UI<br>= 통합자 | @Jossi02 | `manifest.json`, `package.json`, `src/popup.*`, `src/content.css`, `data/**`, `tools/**`, `demo/**`, `docs/**`, 통합·유지보수 |
 
-- 작업 전 `OWNERS.md` 의 소유권 지도에서 담당을 확인한다. 선행 조건은 `tasks.md`.
-- 담당 밖 파일은 읽기만 하고 변경은 소유자에게 요청한다.
-- `CLAUDE.md`, `OWNERS.md`, `SPEC.md`, `plan.md`는 통합자만 수정한다.
-- `tasks.md`는 자기 담당 항목만, 검증 출력을 직접 확인한 뒤 체크한다.
-- 인터페이스 계약을 바꾸기 전에는 3인 합의를 받는다.
-- 기계용 원본은 `.claude/owners.json` 이다. 소유권이 바뀌면 `OWNERS.md` 와 **같이** 고친다.
+초기 Claude collaboration harness와 icon에는 @kimminje2의 실질 기여가 있다. `.claude/**`의 당시
+maintenance ownership과 original authorship을 같은 의미로 쓰지 않는다.
 
 ## 필수 제약
 
@@ -61,7 +56,7 @@
 
 ```text
 KOJA.matcher.findMatches(text, entries, { maxLevel }) -> [{ start, length, surface, entry }]
-KOJA.matcher.densityStep(density) -> 100:1, 50:2, 25:4, 0:Infinity
+KOJA.matcher.shouldSelect(candidateIndex, density) -> boolean
 KOJA.scope.getRoot(doc) -> Element|null
 KOJA.scope.eachTextNode(root, fn) -> void
 KOJA.replacer.applyMatches(textNode, picks) -> number
@@ -77,8 +72,8 @@ KOJA.tooltip.init() -> void (멱등)
 data/    사전 정본과 생성물
 tools/   사전 검증·빌드
 src/     콘텐츠 스크립트, 팝업, CSS
-tests/   사전·매처 Node 테스트
-demo/    시연 페이지와 로컬 백업
+tests/   사전·매처·content lifecycle·manifest Node 테스트
+demo/    자체 시연 페이지와 historical Wikipedia backup
 icon/    확장 아이콘 (svg 원본 + png 4종, 256은 웹스토어용)
 docs/    실측 기록·스크린샷·발표 덱
 .claude/ 팀 공용 하네스 — 아래 참조
@@ -86,50 +81,14 @@ docs/    실측 기록·스크린샷·발표 덱
 
 ## 하네스 (`.claude/`)
 
-경로가 `.claude/` 밖이면 Claude Code는 쳐다보지 않는다 — **파일을 옮기지 않는다.**
+현재 공용 `.claude/settings.json`은 일반적인 두 hook만 활성화한다.
 
-```text
-.claude/settings.json         훅 배선 + 공통 ask. 팀 공용, 커밋한다
-.claude/settings.local.json   내 레인의 deny + KOJA_LANE. 커밋하지 않는다 ← 각자 만든다
-.claude/lane-templates/       위 파일로 복사할 레인별 템플릿 (A·B·C)
-.claude/owners.json           소유권 지도 기계용 원본. 훅과 템플릿이 이걸 읽는다
-.claude/gen-lane-settings.mjs owners.json → lane-templates 재생성
-.claude/hooks/                훅 소스
-.claude/agents/               위임용 에이전트 정의
-```
+- `PostToolUse`(Write|Edit) → `post-edit-check.mjs`: 편집한 JavaScript 문법 검사
+- `Stop` → `stop-review-gate.mjs`: `npm test`와 review gate 실행
 
-### 처음 한 번 — 내 레인 켜기
-
-**이걸 안 하면 소유권 층이 통째로 꺼져 있다.** clone 직후 자기 레인으로 한 번 복사한다.
-
-```
-cp .claude/lane-templates/A.json .claude/settings.local.json    # A/B/C 중 자기 것
-```
-
-Claude Code를 재시작한 뒤 `/permissions` 로 규칙이 실제로 살아 있는지 확인한다.
-**목록에 없으면 무시된 것이다.** 그다음 한 번 일부러 어겨 본다.
-
-### 세 층
-
-| 층 | 무엇 | 강제되나 |
-|---|---|---|
-| 글 | `OWNERS.md` (위 `@` import 로 자동 로드) | 읽어야 걸린다 |
-| 권한 | `settings.local.json` 의 `deny` | Claude Code가 강제한다. **단 "풀어줘" 하면 풀린다** |
-| 훅 | `owner-guard.mjs` | 안 뚫린다. 대신 막지 않고 **기록만** 남긴다 |
-
-> `CLAUDE.md` 는 Claude가 **무엇을 하려 할지**를 바꾸지만, **무엇이 허용되는지**는 바꾸지 못한다.
-> 그래서 세 층이 다 필요하다. 하네스는 금지가 아니라 추적이다.
-
-### 훅 3개
-
-- `PostToolUse`(Write|Edit) → `post-edit-check.mjs` 편집한 파일의 문법을 즉시 검사한다
-- `PostToolUse`(Write|Edit) → `owner-guard.mjs` 내 소유 밖을 고치면 `CHANGELOG-INBOX/` 에 쪽지를 만든다
-- `Stop` → `stop-review-gate.mjs` 세션을 끝낼 때 `npm test` 전체 + 리뷰 게이트(180s)를 돌린다
-
-`.claude/agents/implementer.md` 는 태스크 하나를 TDD로 구현하는 서브에이전트다.
-
-`settings.json` 을 고치면 **3인 전원에게 걸린다. 통합자만 고친다.**
-나만 바꾸고 싶으면 `settings.local.json` 에 쓴다 — 커밋되지 않는다.
+`owner-guard.mjs`, `owners.json`, `lane-templates/`, `CHANGELOG-INBOX/`는 2026-08-19의 3인 lane
+협업 tooling과 provenance를 보존한다. current shared settings에는 owner guard나 lane별 permission이
+등록돼 있지 않으며, 새 clone의 일반 유지보수에 3인 ownership을 강제하지 않는다.
 
 ## 검증과 완료 기준
 
