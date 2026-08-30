@@ -73,7 +73,7 @@ data/    사전 정본과 생성물
 tools/   사전 검증·빌드
 src/     콘텐츠 스크립트, 팝업, CSS
 tests/   사전·매처·content lifecycle·manifest Node 테스트
-demo/    자체 시연 페이지와 historical Wikipedia backup
+demo/    자체 시연 페이지 (외부 사이트 backup은 current tree에서 제거)
 icon/    확장 아이콘 (svg 원본 + png 4종, 256은 웹스토어용)
 docs/    실측 기록·스크린샷·발표 덱
 .claude/ 팀 공용 하네스 — 아래 참조
