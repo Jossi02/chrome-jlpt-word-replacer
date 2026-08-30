@@ -80,11 +80,12 @@ test('레벨 누적 필터 — N5 에서는 N3 단어가 안 잡힌다', () => {
   assert.equal(matcher.findMatches(n3.korean, dict, { maxLevel: 'N3' }).length, 1);
 });
 
-test('densityStep — 결정적 (§F2)', () => {
-  assert.equal(matcher.densityStep(100), 1);
-  assert.equal(matcher.densityStep(50),  2);
-  assert.equal(matcher.densityStep(25),  4);
-  assert.equal(matcher.densityStep(0),   Infinity);
+test('밀도 — UI의 0~100% 모든 단계가 100개 후보에서 정확한 개수를 고른다', () => {
+  for (let density = 0; density <= 100; density += 5) {
+    const picked = Array.from({ length: 100 }, (_, i) => i)
+      .filter(i => matcher.shouldSelect(i, density));
+    assert.equal(picked.length, density, `${density}%에서 ${picked.length}개 선택`);
+  }
 });
 
 const pairs = JSON.parse(read('../data/substring-pairs.json'));
@@ -106,13 +107,11 @@ test('74쌍 — 조사가 붙어도 긴 쪽이 이긴다', () => {
 });
 
 test('밀도 — 러닝 카운터 기준 균등 간격 (노드별 0 리셋이 아니다)', () => {
-  const step = matcher.densityStep(50);
-  assert.equal(step, 2);
   // content.js 가 하는 일을 그대로 재현한다
   let seq = 0;
   const picked = [];
   for (const node of [['a', 'b'], ['c'], ['d', 'e', 'f']]) {   // 3개 노드, 후보 6개
-    for (const cand of node) if (seq++ % step === 0) picked.push(cand);
+    for (const cand of node) if (matcher.shouldSelect(seq++, 50)) picked.push(cand);
   }
   assert.deepEqual(picked, ['a', 'c', 'e']);   // 노드별 리셋이면 ['a','c','d'] 가 되어 틀린다
 });
@@ -120,8 +119,7 @@ test('밀도 — 러닝 카운터 기준 균등 간격 (노드별 0 리셋이 �
 test('밀도 — 같은 입력이면 항상 같은 출력 (§F2 결정성)', () => {
   const run = () => {
     let seq = 0, out = [];
-    const step = matcher.densityStep(33);
-    for (let i = 0; i < 20; i++) if (seq++ % step === 0) out.push(i);
+    for (let i = 0; i < 20; i++) if (matcher.shouldSelect(seq++, 33)) out.push(i);
     return out;
   };
   assert.deepEqual(run(), run());
