@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Test
+        run: npm test
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          while IFS= read -r file; do
+            node --check "$file"
+          done < <(git ls-files '*.js' '*.mjs')
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Rebuild dictionary
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python tools/build_dictionary.py
+
+      - name: Check generated dictionary
+        run: git diff --exit-code -- data/dictionary.js data/substring-pairs.json
