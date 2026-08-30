@@ -121,11 +121,12 @@ def main():
     js = ("// 자동 생성됨 — 직접 편집하지 말 것. tools/build_dictionary.py 를 실행할 것\n"
           "window.KOJA_DICT = " +
           json.dumps(entries, ensure_ascii=False, separators=(",", ":")) + ";\n")
-    open(OUT_JS, "w", encoding="utf-8").write(js)
+    with open(OUT_JS, "w", encoding="utf-8", newline="\n") as out:
+        out.write(js)
 
     # 테스트가 그대로 읽어 쓰는 최장 일치 케이스 목록
-    json.dump([{"short": s, "long": t} for s, t in pairs],
-              open(OUT_PAIRS, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    with open(OUT_PAIRS, "w", encoding="utf-8", newline="\n") as out:
+        json.dump([{"short": s, "long": t} for s, t in pairs], out, ensure_ascii=False, indent=1)
 
     lv = collections.Counter(e["level"] for e in entries)
     print("OK — 불변식 8종 전부 통과")
