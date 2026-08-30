@@ -1,256 +1,173 @@
 # KoJa
 
-**한국어 웹페이지의 명사를 일본어 표기와 후리가나로 치환하는 Chrome 확장**
+**한국어 웹페이지의 일부 명사를 일본어 표기와 후리가나로 바꿔, 웹서핑 중 JLPT 어휘 노출을 만드는 Chrome Manifest V3 확장입니다.**
 
-따로 시간을 내서 외우는 대신 평소 웹서핑 중에 일본어 어휘 노출량을 만드는 방법을 다룬
-**바이브코딩 특강 해커톤** 결과물입니다. 3인이 하루 만에 설계·구현·실측까지 완주했습니다.
+핵심 구현은 2026-08-19 약 13시간의 바이브코딩 특강 3인 해커톤에서 진행했고, 이후 통합·문서·정확성
+hardening이 이어졌습니다. Claude Code를 적극적으로 사용한 AI-assisted 프로젝트이며, 빠르게 생성한
+산출물을 인터페이스 계약과 재현 가능한 검증으로 통합하는 데 초점을 뒀습니다.
 
+![KoJa 자체 데모 페이지](docs/images/demo-page.jpg)
+
+## Project Overview
+
+- Chrome Manifest V3의 선언형 content script 6개를 의존 순서대로 로드합니다.
+- `data/dictionary.json`에 646개 엔트리와 677개 매칭 표면형(대표 646 + 별칭 31)을 번들합니다.
+- 확장 런타임 의존성과 outbound network call은 모두 0이며 번역 API·LLM·telemetry를 사용하지 않습니다.
+- 최장 일치, 한국어·숫자·영문 경계, 조사 허용 규칙으로 명사 표면형을 결정적으로 찾습니다.
+- 밀도 0~100%를 무작위 없이 누적 quota로 적용하고, 같은 입력과 설정에는 같은 결과를 냅니다.
+- 원래 표면형을 보존해 치환을 되돌리고, MutationObserver로 선택된 본문 아래의 새 텍스트를 처리합니다.
+- 현재 `npm test` 39건과 GitHub Actions CI가 matcher·사전·content lifecycle·manifest 계약을 검사합니다.
+
+## How It Works
+
+```mermaid
+flowchart LR
+    P[Popup] --> S[(chrome.storage.local)]
+    S --> C[content orchestration]
+    C --> M[matcher]
+    C --> D[DOM scope]
+    C --> R[replacer]
+    C --> T[tooltip]
+    R --> W[Web page DOM]
+    T --> W
+    J[data/dictionary.json] --> B[Python invariant builder]
+    B --> G[data/dictionary.js]
+    G --> M
 ```
-원본 페이지                        확장 적용 후
-─────────────────────────         ─────────────────────────
-오늘 아침에 학교 앞 카페에서        今朝(けさ)에 学校(がっこう) 앞 喫茶店(きっさてん)에서
-친구를 만났다. 시간이 없어서        友達(ともだち)를 만났다. 時間(じかん)이 없어서
-커피만 마시고 바로 회사로 갔다.     コーヒー만 마시고 바로 会社(かいしゃ)로 갔다.
-```
 
-괄호 안 가나는 실제로는 한자 위에 `<ruby>`로 얹힙니다. 조사와 문장 구조는 건드리지 않습니다.
-문맥은 모국어로 남겨두고 단어의 형태와 읽기에만 인지 자원을 쓰게 하는 것이 설계 의도입니다.
+팝업과 content script는 `enabled`, `furigana`, `level`, `density` 네 키를 공유합니다. 메시지 경로를
+추가하지 않고 `chrome.storage.onChanged` 하나로 설정 변경을 반영합니다. 사전 정본은 Python builder가
+불변식 8종을 확인한 뒤 확장용 JavaScript와 부분 문자열 회귀 데이터로 생성합니다.
 
-![위키백과 문서에 적용한 화면](docs/images/wikipedia.jpg)
+## Key Engineering Decisions
 
-- **바이브코딩 특강 해커톤** — 2026년 8월 19일 하루(약 13시간), 3인 팀, 커밋 41개
-- Chrome Manifest V3, **런타임 네트워크 호출 0건**(번역 API·LLM 미사용). 사전 646개를 번들로 싣습니다
-- 자동 테스트 36개, 사전 빌드가 불변식 8종을 강제
-- 3사이트 실측으로 오탐 4건을 찾아 제거
-- 담당: 레인 C(데이터·셸·UI) 및 통합자
+### 1. 형태소 분석기 없이 한국어 경계 맞추기
 
-> 이 문서는 저장소의 코드와 검증 기록을 기준으로 썼습니다. 설계 근거는 [`SPEC.md`](SPEC.md),
-> 인터페이스 계약은 [`plan.md`](plan.md), 진행 기록은 [`tasks.md`](tasks.md)에 있습니다.
-> 문서의 `D1`·`D2`·`D3`는 날짜가 아니라 **작업 단계**입니다. 3일치로 설계한 계획을 하루에 압축했습니다.
+명사 뒤 조사는 허용하되, 앞뒤에 한글·숫자·영문이 이어지는 부분 문자열은 제외합니다. 표면형을 길이
+내림차순으로 컴파일해 「아주머니」를 「주머니」로 쪼개지 않고, 빌드가 찾은 부분 문자열 74쌍을 회귀
+테스트로 고정했습니다.
 
-## 설치
+| 입력 | 결과 | 이유 |
+| --- | --- | --- |
+| `경제가 나빠졌다` | `経済가 나빠졌다` | 조사 `가` 허용 |
+| `경제학 개론` | 치환하지 않음 | 뒤 한글 경계 |
+| `신경제 정책` | 치환하지 않음 | 앞 한글 경계 |
+| `2시간 걸렸다` | 치환하지 않음 | 앞 숫자 경계 |
+
+별칭으로 매치해도 대표 표제어가 아니라 페이지에 실제 있던 `surface`를 tooltip과 복원 데이터에 남깁니다.
+
+### 2. 백분율 의미를 지키는 deterministic density
+
+`Math.random()` 대신 후보의 전역 index 전후에서 누적 기대 선택 수가 증가하는지를 비교합니다. UI가
+허용하는 0, 5, …, 100% 모두 100개 후보에서 해당 개수를 정확히 고르며, 텍스트 노드가 달라도 하나의
+running candidate sequence를 사용합니다. 설정 변경이나 rerender 뒤에도 같은 문서는 같은 결과가 됩니다.
+
+### 3. 되돌릴 수 있는 DOM mutation
+
+치환 span은 `data-ko`와 `data-kana`에 실제 표면형과 읽기를 보존합니다. 끄기·레벨·밀도 변경 시 span을
+텍스트 노드로 복원하고 부모의 `normalize()`를 호출해 반복 rerender에서 DOM 조각이 누적되지 않게 합니다.
+`input`, `textarea`, `contenteditable`, `pre/code`, `script/style`, `ruby/rt`, `aria-hidden`, navigation은
+스캔에서 제외합니다.
+
+### 4. 동적 페이지의 observer lifecycle
+
+로드 직후와 지연 scan 뒤 본문 root를 관찰하고, 확장이 만든 `.koja-word` mutation은 다시 처리하지
+않습니다. 비활성화 시 observer를 끊으며, 이미 예약된 시작 callback도 `enabled`를 다시 확인합니다.
+사전 엔트리별 첫 등장 정책과 페이지당 200개 상한은 재스캔에도 유지됩니다.
+
+## Validation
+
+### Current automated validation
+
+| 검사 | 현재 결과 |
+| --- | --- |
+| `npm test` | 39 passed / 0 failed / skipped·todo 0 |
+| 사전 | 646 entries · 677 surfaces · 542 ruby · 74 substring pairs · invariants 8종 |
+| 정적 검사 | tracked JavaScript/MJS syntax와 manifest 참조·로드 순서 검사 |
+| 생성 재현성 | Python 3.12 rebuild 뒤 `dictionary.js`와 `substring-pairs.json` drift 0 |
+| CI | push와 pull request에서 위 검사를 GitHub Actions로 실행 |
+
+### Historical manual validation
+
+2026-08-19 해커톤 당시 자체 데모, 한국어 위키백과, Daum 뉴스 페이지에서 N1·밀도 100% 조건을 수동
+확인했습니다. 네 가지 명백한 오치환을 찾아 matcher 예외·엔트리/별칭 제거와 회귀 테스트로 처리했습니다.
+이는 당시 개발 환경의 기록이며 현재 자동 browser E2E 결과가 아닙니다.
+
+상세 측정은 [`docs/misfires.md`](docs/misfires.md)와
+[`docs/d3-3-safety.md`](docs/d3-3-safety.md)에 남아 있습니다. 수동 검증에 사용한 외부 페이지 전체
+snapshot은 current tree에서 제거했고 기존 Git history는 보존했습니다.
+
+## Quick Start
 
 ```bash
 git clone https://github.com/Jossi02/chrome-jlpt-word-replacer.git
 cd chrome-jlpt-word-replacer
-npm test        # 36/36. 의존성 설치 없이 Node만 있으면 됩니다
+npm test
 ```
 
-`chrome://extensions` → 개발자 모드 ON → **압축해제된 확장 프로그램을 로드** → 이 폴더 선택.
-한국어 페이지를 열면 조작 없이 단어가 바뀝니다. 툴바 아이콘에서 켜기/끄기, 후리가나 토글,
-레벨(N5\~N1), 밀도(0\~100%)를 조절합니다.
+`npm install`은 필요하지 않습니다. `chrome://extensions`에서 개발자 모드를 켜고 **압축해제된 확장
+프로그램을 로드**한 뒤 이 폴더를 선택합니다.
 
-시연 페이지는 로컬 서버로 엽니다. `file://`은 콘텐츠 스크립트에 별도 권한이 필요합니다.
+자체 데모를 볼 때만 선택적으로 정적 서버를 실행합니다. Python은 확장 런타임 의존성이 아닙니다.
 
 ```bash
-npx --yes http-server -p 8000 .
+python -m http.server 8000
 # http://localhost:8000/demo/sample.html
 ```
 
-권한은 `storage` 하나입니다. 설치 시 "모든 웹사이트의 데이터 읽기" 경고가 뜨는데, 텍스트를 바꾸려면
-텍스트를 읽어야 하기 때문이며 외부로 나가는 데이터는 없습니다.
+![KoJa 팝업 설정 UI](docs/images/popup.png)
 
-## 왜 한국어 → 일본어인가
+## Permissions and Privacy
 
-한국인은 한자어를 이미 압니다. 「時間」「学校」「安全」은 배우지 않아도 뜻이 짐작됩니다. 시작점이 0%가
-아니라서 첫날부터 치환된 단어의 상당수가 바로 읽힙니다. 이 이점은 한국어·중국어 사용자에게만 있고,
-영어권 사용자를 대상으로 하는 유사 도구(Toucan 등)는 활용할 수 없습니다.
+- manifest permission은 `storage` 하나이며 설정 네 키를 로컬에 저장합니다.
+- content script의 match 범위는 `<all_urls>`입니다. 따라서 설치 시 모든 사이트의 텍스트를 읽고 변경할 수
+  있다는 site access 경고가 표시될 수 있으며, 이는 manifest permission 목록과 별개의 범위 선언입니다.
+- 확장 런타임 outbound network call, telemetry, analytics는 0이고 페이지 텍스트를 외부로 보내지 않습니다.
+- 역사 발표 문서가 외부 font를 불러오는 동작은 확장 런타임과 별개입니다.
 
-대가는 거짓짝입니다. 「勉強」은 면강이 아니라 공부고 「大丈夫」는 대장부가 아니라 괜찮다는 뜻인데,
-사용자는 틀렸다는 신호를 못 받은 채 확신합니다. 대부분은 사전을 만들 때 걸러냈고, 확실한 사례
-(「勉強」)는 남겨두는 대신 밑줄 색을 다르게 표시합니다.
+## Team Collaboration and AI Use
 
-![거짓짝 밑줄 — 勉強만 다른 색](docs/images/false-friend.png)
+아래는 [`OWNERS.md`](OWNERS.md), PR과 파일 history가 함께 지지하는 original hackathon ownership
+요약입니다. 모든 로컬 Git author identity와 GitHub 계정의 일대일 대응까지 단정하는 표는 아닙니다.
 
-바로 앞 「図書館」은 기본 밑줄, 「勉強」만 주황색입니다. 툴팁 내용은 다른 단어와 똑같이 원본 한국어와
-읽기 2줄뿐입니다 — 경고 문구를 추가하면 툴팁이 상시 참조 도구가 되어 버리므로, 색 하나로만 신호를
-줍니다. 사전 엔트리에 `falseFriend: true` 한 줄만 추가하면 되는 구조라 후보를 찾을 때마다 넓힐 수
-있습니다.
+| 담당 | Original hackathon ownership |
+| --- | --- |
+| A / [@kimminje2](https://github.com/kimminje2) | matcher와 matcher/dictionary tests, 초기 Claude 협업 harness, icon 기여 |
+| B / [@hersmen98](https://github.com/hersmen98) | `scope.js`, `replacer.js`, `tooltip.js`, `content.js` |
+| C / [@Jossi02](https://github.com/Jossi02) | data/build pipeline, manifest/package shell, popup/CSS, demo/docs, integration·maintenance |
 
-## 까다로웠던 부분
+기능 lane은 주로 PR로 통합했고, 이후 integration·documentation·maintenance에는 직접 commit도
+포함됩니다. `OWNERS.md`는 현재 유지보수자를 강제하는 정책이 아니라 당시 파일 분담 기록입니다.
 
-### 형태소 분석기 없이 어절 경계 잡기
+Claude Code는 설계·구현·검토에 적극 사용했습니다. 생성 결과를 사실로 전제하지 않고 모듈 시그니처,
+사전 불변식, Node tests, 당시 수동 확인으로 교차 검증했습니다. 현재 shared settings에는 post-edit syntax
+check와 stop-time test/review gate가 활성화되어 있고, owner guard·lane template·CHANGELOG-INBOX는
+당시 병렬 협업을 설명하는 historical opt-in tooling으로 보존합니다.
 
-한국어는 조사가 명사에 붙습니다. 「경제」를 찾으려면 「경제가」「경제를」「경제에서는」을 다 잡아야 하는데
-「경제학」과 「신경제」는 잡으면 안 됩니다. 형태소 분석기는 확장 크기가 부담이라 조사 목록과 앞뒤 경계
-검사로 처리했습니다.
+## Known Limitations
 
-| 입력 | 결과 | 근거 |
-| --- | --- | --- |
-| `경제가 나빠졌다` | 経済가 나빠졌다 | 조사 「가」를 경계로 인정 |
-| `경제학 개론` | 치환하지 않음 | 표면형 뒤에 한글이 이어짐 |
-| `신경제 정책` | 치환하지 않음 | 표면형 앞에 한글이 붙음 |
-| `2시간 걸렸다` | 치환하지 않음 | 앞이 숫자. 경계 문자에 `0-9`가 없으면 「2」+ 時間으로 깨짐 |
-| `아주머니가 왔다` | 伯母さん가 왔다 | 최장 일치로 「주머니」로 쪼개지지 않음 |
+- 형태소 분석기가 아닌 경계·조사 heuristic이므로 새로운 문맥 오탐이 생길 수 있습니다.
+- 선택한 본문 root 아래의 mutation은 처리하지만 SPA가 root 자체를 교체하면 자동으로 다시 찾지 않습니다.
+- 실제 사이트 검증은 2026-08-19의 역사 기록이며 현재 자동화된 Chrome E2E suite는 없습니다.
+- 사전 생성물은 재현 가능하지만 당시 참고한 외부 어휘 자료의 정확한 revision·license provenance는 현재
+  저장소만으로 완전히 재구성되지 않습니다.
+- Chrome Web Store에 배포·심사된 확장이 아니며, 설치 시 `<all_urls>` site access가 필요합니다.
 
-![데모 페이지의 경계 함정 상자](docs/images/boundary-rules.png)
+## Project History and Design Records
 
-시연 페이지에 넣어둔 함정 케이스입니다. 위 상자는 통째로 치환되어야 하고, 아래 상자의 「경제학」
-「2시간」「신경제」「10년간」「3주말」은 한국어로 남아야 합니다. 같은 문장의 「수업」과 「기록」은 치환됩니다.
+- [`SPEC.md`](SPEC.md) — 현재 계약과 역사적 설계 결정
+- [`plan.md`](plan.md), [`tasks.md`](tasks.md) — 2026-08-19의 historical development artifacts
+- [`docs/misfires.md`](docs/misfires.md) — 당시 수동 실측과 오치환 처리 기록
+- [`docs/d3-3-safety.md`](docs/d3-3-safety.md) — 당시 안전성 점검 기록
+- [`OWNERS.md`](OWNERS.md) — original ownership과 historical collaboration tooling
+- [`docs/THIRD_PARTY.md`](docs/THIRD_PARTY.md) — 외부 검증 자료와 사전 provenance 범위
 
-최장 일치는 정규식 alternation이 왼쪽부터 평가되는 성질을 이용했습니다. 표면형을 길이 내림차순으로
-정렬해 넣으면 긴 쪽이 먼저 잡힙니다. 이 정렬이 빠지면 「아주머니」가 「주머니」로 쪼개지므로, 사전
-빌드가 산출하는 부분 문자열 쌍 74건을 그대로 테스트 케이스로 씁니다.
+## Rights and Provenance
 
-### 같은 페이지는 항상 같게 보여야 한다
-
-밀도 슬라이더에 `Math.random()`을 쓰면 새로고침마다 화면이 달라져 시연을 못 합니다. 그래서 페이지
-전체를 관통하는 러닝 카운터로 균등 간격 선택을 합니다. 이 카운터를 텍스트 노드마다 초기화하면 모든
-노드의 첫 후보가 통과해 슬라이더가 사실상 안 먹는데, 이 부분은 구현보다 테스트를 먼저 썼습니다.
-
-### 껐을 때 원문 그대로 돌아오기
-
-치환은 텍스트 노드를 쪼개 span을 끼우는 작업이라 되돌리면 노드가 파편화된 채 남습니다. 복원 후 부모에
-`normalize()`를 부르지 않으면 켜고 끄기를 반복할수록 어절이 붙거나 벌어집니다. 3사이트에서 3회씩
-왕복시켜 서버 원본과 텍스트가 일치하는지 확인했습니다.
-
-### 나머지
-
-- **입력창 보호** — `input`/`textarea`/`contenteditable`/`pre`/`code` 안의 텍스트는 조상 방향으로
-  거슬러 올라가며 차단합니다. 검색창에 쓴 글자가 바뀌어 전송되면 사고입니다.
-- **MutationObserver 무한 루프** — 확장이 넣은 span이 다시 관찰자를 깨우면 탭이 얼어붙습니다.
-  `.koja-word` 하위 변경은 무시하고, 디바운스 후 disconnect한 다음 스캔합니다.
-  문제가 생기면 `USE_OBSERVER` 상수로 한 줄에 끌 수 있게 뒀습니다.
-- **MV3** — 선언형 콘텐츠 스크립트는 ES 모듈을 못 씁니다. `import`를 쓰면 오류도 없이 아무것도 동작하지
-  않습니다. 모듈 6개가 `window.KOJA` 하나에 붙고 manifest의 `js` 배열 순서가 곧 의존 순서입니다.
-
-## 구조
-
-매칭 로직을 DOM에서 떼어놨습니다. `matcher.js`는 문자열을 받아 매치 목록을 돌려주는 순수 함수라
-브라우저 없이 `node --test`로 검증됩니다.
-
-```mermaid
-flowchart LR
-    POPUP["팝업 UI"] --> ST[("chrome.storage.local<br/>enabled · furigana<br/>level · density")]
-    ST -. "onChanged 구독" .-> CONTENT
-    DICT["dictionary.js<br/>646 엔트리"] --> CONTENT["content.js<br/>오케스트레이션"]
-    CONTENT --> MATCHER["matcher.js<br/>순수 함수"]
-    CONTENT --> SCOPE["scope.js<br/>범위·제외"]
-    CONTENT --> REPLACER["replacer.js<br/>치환·복원"]
-    CONTENT --> TOOLTIP["tooltip.js"]
-    REPLACER --> DOM["웹페이지 DOM"]
-    TOOLTIP --> DOM
-```
-
-착수 전에 모듈 간 시그니처 7개를 확정하고 빈 껍데기를 먼저 커밋했습니다. 3인이 서로를 기다리지 않고
-병렬로 작업한 근거입니다. 계약 전문은 [`plan.md`](plan.md)에 있습니다.
-
-계약의 핵심은 `surface`를 돌려주는 것입니다. 별칭 「생선」으로 잡았으면 툴팁과 복원값 모두 대표 표제어
-「물고기」가 아니라 페이지에 실제로 있던 「생선」을 써야 합니다.
-
-설정은 `chrome.storage.local` 4개 키뿐이고 팝업과 콘텐츠 스크립트는 `storage.onChanged` 구독 하나로만
-통신합니다. `tabs.sendMessage`는 쓰지 않습니다. 두 경로가 함께 있으면 상태가 갈라집니다.
-
-<table>
-<tr>
-<td width="60%"><img src="docs/images/tooltip.png" alt="치환된 단어의 툴팁"></td>
-<td width="40%"><img src="docs/images/popup.png" alt="팝업 설정 UI"></td>
-</tr>
-</table>
-
-툴팁은 페이지에 있던 한국어와 읽기 2행만 보여줍니다. 영어 뜻이나 예문을 넣지 않는 이유는 툴팁이 상시
-참조 도구가 되면 줄이려던 번역 경로를 오히려 강화하기 때문입니다.
-
-## 사전
-
-`data/dictionary.json`이 사람이 고치는 정본이고, Python 빌드가 불변식 8종(표제어 중복, 표면형 전역 충돌,
-한 글자 표면형 금지, `ruby` 플래그 정합 등)을 검사한 뒤 번들과 테스트 데이터를 생성합니다.
-
-```
-$ PYTHONIOENCODING=utf-8 python tools/build_dictionary.py
-OK — 불변식 8종 전부 통과
-  엔트리      : 646  (N5 327 / N4 105 / N3 95 / N2 70 / N1 49)
-  매칭 표면형 : 677  (대표 646 + 별칭 31)
-  ruby 대상   : 542  / 가나 전용 104
-  → data/dictionary.js (82.4 KB)
-  → data/substring-pairs.json
-```
-
-한 글자 표면형을 전량 금지한 것이 오탐 감소에 가장 크게 기여했습니다. 「상」「중」「전」 같은 한 글자
-명사는 어디에나 부분 문자열로 들어가 오탐 대부분을 만들므로, 규칙으로 걸러내는 대신 입력에서 없앴습니다.
-
-## 검증
-
-| 항목 | 범위 | 결과 |
-| --- | ---: | ---: |
-| 자동 테스트 | `node --test` 36건 | 36 통과 / 0 실패 |
-| 실측 사이트 | 데모 · 위키백과 · 뉴스 기사 3곳 | 명백한 오치환 0건 |
-| 안전성 회귀 | 3사이트 × 6항목 | 17 통과 / 1 해당없음 |
-| 무손실 복원 | 3사이트 각 3회 왕복 | 원본과 텍스트 완전 일치 |
-| 콘솔 에러 | 3사이트 각 재로드 3회 | 0건 |
-
-규칙을 통과하는 오탐은 실제 사이트를 읽어야 나옵니다. N1·밀도 100%로 3사이트를 훑어 4건을 찾았습니다.
-
-| 오탐 | 실제 문장 | 원인 | 처리 |
-| --- | --- | --- | --- |
-| 바람 | 잘못 기록하는 바람에 | 관용구를 명사 「바람」(風)으로 인식 | 규칙 예외, 단어 유지 |
-| 사전 | 사전 투표는 선거일 5일 | 事前(미리)과 辞書(책) | 엔트리 삭제 |
-| 고려 | 중세 국가인 고려(高麗) | 고유명사와 考慮(숙고) | 엔트리 삭제 |
-| 상의 | 동해 상의 독도 | "상"+조사"의"가 上着와 일치 | 별칭만 제거 |
-
-원칙은 오탐 하나에 단어 하나 제외입니다. 규칙을 고치면 74쌍 테스트와 경계 규칙이 함께 흔들리는데 단어를
-빼면 아무것도 흔들리지 않습니다. 「바람」만 규칙으로 처리한 건 이 관용구가 항상 `~는 바람에` 형태로만
-나오기 때문입니다. 반면 「사전」은 뒤에 붙는 말이 계속 늘어나(사전 투표·예약·신청) 국소 규칙으로 구분할
-수 없다고 판단했습니다.
-
-개발 PC의 Chrome에서 수행한 검증이며 웹스토어 심사나 다양한 사이트 유형에 대한 일반화를 입증한 것은
-아닙니다. 기록은 [`docs/misfires.md`](docs/misfires.md)와 [`docs/d3-3-safety.md`](docs/d3-3-safety.md)에
-있습니다.
-
-## 나의 주요 기여
-
-> 3인 팀 해커톤이며 확장 전체를 단독으로 구현하지 않았습니다. 매칭 로직(레인 A)과 DOM 조작 계층(레인 B)은
-> 다른 팀원이 담당했습니다. 아래는 [`OWNERS.md`](OWNERS.md)의 파일 단위 소유권 기준입니다.
-
-- 레인 C(데이터·셸·UI) 담당 및 통합자 겸임
-- 사전 정본 설계와 Python 빌드 파이프라인 구현(불변식 8종 검증, 번들·테스트 데이터 생성)
-- `manifest.json`, 팝업 UI, `content.css` — 로드 순서 고정, 권한을 `storage` 하나로 제한, ruby 표시
-- 함정 케이스를 내장한 시연 페이지와 오프라인 백업 페이지
-- 파일 단위 소유권 하네스(`.claude/`) — 편집 시 문법 검사, 세션 종료 시 테스트·리뷰 게이트
-- 3사이트 실측 주도 및 오탐 4건 분류·처리, 기준 문서 관리와 브랜치·PR 통합
-
-### AI 활용과 사람이 판단한 것
-
-특강 주제가 바이브코딩이었으므로 구현 전반에 [Claude Code](https://claude.com/claude-code)를 썼습니다.
-숨길 전제가 아니라 이 프로젝트의 방식이었고, 그래서 제 기여의 실질은 코드 타이핑이 아니라 **하루 동안
-3인 + AI가 만든 산출물이 서로 어긋나지 않게 만든 구조**에 있습니다.
-
-- **인터페이스 계약을 코드보다 먼저 확정**했습니다. 시그니처를 합의하고 빈 껍데기를 커밋했기 때문에
-  세 사람이 서로의 구현을 기다리지 않았습니다.
-- **검증을 사람의 주의력에 맡기지 않았습니다.** 사전은 빌드가 불변식을 강제하고, 문법 검사와 테스트
-  게이트를 훅으로 걸었습니다. 빠르게 생성한 코드가 조용히 깨지는 것을 막는 장치입니다.
-- **완료 기준을 "그 화면을 실제로 봤다"로 정의**했습니다. 실제로 이 규칙 때문에 밀도 슬라이더 항목
-  2개를 미완료로 남겼습니다.
-
-빠르게 만드는 것보다 **빠르게 만든 것이 맞는지 확인하는 절차**가 병목이라는 점이 이 해커톤의 결론입니다.
-
-## 한계
-
-- **레벨 표기는 추정치입니다.** JLPT는 2010년부터 공식 단어 목록을 공개하지 않아 시중 단어장은 전부
-  추정판이며 서로 다릅니다. 표기·후리가나·표제어·레벨은 직접 작성했습니다.
-- **조사 목록 방식은 완전하지 않습니다.** 어절 끝만 검사하므로 의미를 판별하지 못하고, 새 오탐 유형은
-  계속 나올 수 있습니다. 위 4건이 그 예입니다.
-- **복습 장치가 없습니다.** 학습 기록·통계를 범위 밖에 뒀으므로 학습 앱으로 제시하지 않습니다. 노리는
-  것은 이미 이해한 문맥에서 형태를 반복 마주치는 우연적 학습입니다. 명사만 바꾸므로 독해 향상도
-  입증하지 않습니다.
-- **하루라는 일정이 곧 한계입니다.** 실측은 3사이트에 그쳤고 오탐도 거기서 눈에 띈 것만 잡았습니다.
-  사이트를 넓히면 새 오탐이 나올 것이라고 보는 편이 맞습니다.
-
-## 함께 만든 사람
-
-| | 담당 | 맡은 일 |
-| --- | --- | --- |
-| [@kimminje2](https://github.com/kimminje2) | 레인 A · 로직 | 최장 일치 매처, 조사·경계 규칙, 밀도 step, 사전·매처 테스트 |
-| [@hersmen98](https://github.com/hersmen98) | 레인 B · DOM | 범위 판정과 제외 규칙, ruby 치환·무손실 복원, 툴팁, 스캔 오케스트레이션 |
-| [@Jossi02](https://github.com/Jossi02) | 레인 C · 데이터·셸·UI (통합자) | 사전 파이프라인, manifest, 팝업·CSS, 시연 페이지, 하네스, 실측·통합 |
-
-`src/`를 세 사람이 나눠 쓰기 때문에 폴더가 아니라 **파일 단위로 소유권을 나눴습니다.** 공유 파일 없이
-모든 파일에 주인이 한 명씩 있고, 브랜치를 레인과 1:1로 두고 PR로만 합쳤습니다. 하루짜리 일정에서는
-병합 충돌 한 번이 전체를 멈출 수 있기 때문입니다. 상세 소유권은 [`OWNERS.md`](OWNERS.md)에 있습니다.
-
-이 README는 레인 C 관점에서 정리한 것이므로, 매칭 로직과 DOM 계층의 설계 의도는 해당 담당자의 설명이
-더 정확합니다.
+저장소 전체에 적용되는 오픈소스 라이선스는 현재 명시되어 있지 않습니다. 공동 기여자 합의와 사전 참고
+자료 provenance를 확인한 뒤 별도로 결정해야 합니다. 자세한 현재 범위는
+[`docs/THIRD_PARTY.md`](docs/THIRD_PARTY.md)에 기록했습니다.
 
 ---
 
-Chrome MV3 · 브라우저 전역 스크립트 · `node --test`(Node 24) · Python 3(사전 빌드 전용) · 런타임 의존성 없음
+Chrome MV3 · plain JavaScript · `node --test` · Python 3.12 dictionary builder · runtime dependencies 0

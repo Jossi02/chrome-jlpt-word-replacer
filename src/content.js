@@ -27,18 +27,12 @@ window.KOJA = window.KOJA || {};
       if (!state.root) state.root = KOJA.scope.getRoot(document);
       if (!state.root) { console.warn('[KoJa] 본문을 찾지 못했다'); return; }   // §8.5
 
-      // 설정이 깨졌으면(undefined·null·문자열) densityStep 이 NaN 이나 Infinity 로 접혀
-      // 아무것도 안 바뀌는데 콘솔도 조용하다. 단서를 남기고 멈춘다 (§8.5)
+      // storage 값이 깨졌으면 아무것도 바꾸지 않고 진단을 남긴다 (§8.5)
       var density = state.settings.density;
-      if (typeof density !== 'number' || !isFinite(density)) {
+      if (typeof density !== 'number' || !isFinite(density) || density < 0 || density > 100) {
         console.warn('[KoJa] density 설정이 올바르지 않다 — 치환하지 않는다', density);
         return;
       }
-
-      // §F2 · D1-A4 — JS 에서 0 % Infinity === 0 이라 이 가드가 없으면 밀도 0% 에서
-      // 첫 후보가 항상 통과한다. 0% 는 사용자의 정상 선택이므로 조용히 0건으로 끝낸다
-      var step = KOJA.matcher.densityStep(density);
-      if (!isFinite(step)) return;
 
       KOJA.scope.eachTextNode(state.root, function (node) {
         if (state.total >= MAX_REPLACEMENTS) return;
@@ -49,7 +43,7 @@ window.KOJA = window.KOJA || {};
         var picks = [];
         for (var i = 0; i < ms.length; i++) {
           if (state.seenIds.has(ms[i].entry.id)) continue;      // 첫 등장만
-          if (state.candSeq++ % step !== 0) continue;           // 결정적 밀도
+          if (!KOJA.matcher.shouldSelect(state.candSeq++, density)) continue; // 결정적 밀도
           if (state.total + picks.length >= MAX_REPLACEMENTS) break;
           state.seenIds.add(ms[i].entry.id);
           picks.push(ms[i]);
@@ -63,7 +57,7 @@ window.KOJA = window.KOJA || {};
 
   // ── D2-5 MutationObserver — 끌 수 있는 형태로 (§7) ────────────────────────
   function startObserver() {
-    if (!USE_OBSERVER || observer || !state.root) return;
+    if (!USE_OBSERVER || !state.settings.enabled || observer || !state.root) return;
     observer = new MutationObserver(function (records) {
       // 확장이 삽입한 노드는 무시한다 — 이게 없으면 무한 루프다 (§7)
       var meaningful = false;

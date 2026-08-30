@@ -1,7 +1,10 @@
 # OWNERS — 누가 무엇을 소유하나
 
+> **Historical collaboration artifact:** 이 문서는 2026-08-19 해커톤 당시의 구현 분담과 lane policy를
+> 보존한다. 현재 유지보수에 강제되는 ownership 정책은 아니다. 실제 기여는 Git/PR history와 함께 본다.
+
 > KoJa 팀 (3인) · 근거: `plan.md`「인원 3인 · 역할」 + 「최종 파일 구조」
-> **이 파일은 통합자(C)만 수정한다.** 바꿀 게 있으면 GitHub 이슈나 PR로 요청한다.
+> 당시에는 이 파일을 통합자(C)가 관리했다.
 
 ## 소유권 지도
 
@@ -22,9 +25,11 @@
 
 > `src/content.js` 는 B 소유다. 단 **D2-1에서만 A·B가 함께 앉아** 쓴다 (`plan.md` D2-1).
 
-> `.claude/**` 는 **3인 전원에게 동시에 걸리는** 하네스다 (`CLAUDE.md`「하네스」).
-> `settings.json` 을 한 줄 고치면 세 사람의 훅이 같이 바뀐다. **통합자만 고친다.**
-> 나만 끄고 싶으면 `.claude/settings.local.json` 에 쓴다 — `.gitignore` 에 있어 커밋되지 않는다.
+> 해커톤 당시 `.claude/**`는 3인 전원용 하네스로 설계했다. 현재 공용 settings는 문법 검사와
+> test/review gate만 활성화하며 owner guard와 lane permission은 historical tooling으로 보존한다.
+
+이 표는 당시 maintenance ownership이다. 초기 Claude collaboration harness와 icon의 original
+implementation에는 @kimminje2의 실질 기여가 있고, 이후 통합·유지보수는 @Jossi02가 맡았다.
 
 ### 새 파일을 만들면
 
@@ -42,7 +47,7 @@
 2. 루트 `CLAUDE.md`·`SPEC.md`·`plan.md`는 **통합자만.** 내 레인 규칙은 별도로 쓰지 말고 이 표를 따른다.
 3. 그래도 뚫었으면 → 훅이 `CHANGELOG-INBOX/` 에 쪽지를 만든다. **빈칸을 채우고 담당자에게 통보**한다.
 
-## 하네스 켜기 — clone 후 처음 한 번
+## 당시 하네스 켜기 절차
 
 **이걸 안 하면 위 규칙이 글로만 존재한다.** 자기 레인 템플릿을 복사한다.
 
@@ -69,7 +74,7 @@ C 에 `deny` 가 없는 것은 실수가 아니다. **통합자는 모든 파일
 |----|------|--------|
 | 글 | `OWNERS.md` — `CLAUDE.md` 의 `@OWNERS.md` 로 자동 로드된다 | 안 읽으면 뚫림 |
 | 권한 | `settings.local.json` 의 `deny` | **부탁하면 풀림.** 잠금장치가 아니라 안전벨트 |
-| 훅 | `.claude/hooks/owner-guard.mjs` | **안 뚫림.** 대신 막지 않고 기록만 남김 |
+| 훅 | `.claude/hooks/owner-guard.mjs` | historical opt-in. 현재 공용 settings에는 등록되지 않음 |
 
 ### 소유권이 바뀌면
 
@@ -80,7 +85,7 @@ C 에 `deny` 가 없는 것은 실수가 아니다. **통합자는 모든 파일
 node .claude/gen-lane-settings.mjs
 ```
 
-## 브랜치 · 합치기
+## 해커톤 당시 브랜치 · 합치기 정책
 
 Git을 쓰므로 파일을 주고받지 않는다. **브랜치가 곧 레인이다.**
 
@@ -89,7 +94,7 @@ Git을 쓰므로 파일을 주고받지 않는다. **브랜치가 곧 레인이�
 | 기본 브랜치 | `feat/koja-v0.1` |
 | 작업 브랜치 | `feat/A-<할일>` · `feat/B-<할일>` · `feat/C-<할일>` |
 | 문서 브랜치 | `docs/<할일>` (통합자 검토 필요) |
-| 합치기 | **PR로만.** 기본 브랜치에 직접 push 하지 않는다 |
+| 합치기 | 당시 원칙은 **PR로만**. 이후 통합·문서 작업에는 default 직접 commit도 존재 |
 | 리뷰 | 내 레인 밖 파일이 PR에 들어 있으면 **그 파일 담당자의 승인**을 받는다 |
 | 시작 전 | 항상 `git pull` 부터. 남의 커밋 위에서 작업한다 |
 
@@ -103,7 +108,7 @@ Git을 쓰므로 파일을 주고받지 않는다. **브랜치가 곧 레인이�
 | 전역 네임스페이스 | 모든 `src/*.js` 가 `window.KOJA = window.KOJA \|\| {};` 로 시작 | 공통 |
 | 사전 전역 | `window.KOJA_DICT` (`data/dictionary.js`) | C |
 | 매칭 | `KOJA.matcher.findMatches(text, entries, { maxLevel })`<br>→ `[{ start, length, surface, entry }]` · 문서 순서 · 겹치지 않음 | A |
-| 밀도 | `KOJA.matcher.densityStep(density)` → `number` (100→1, 50→2, 25→4, 0→Infinity) | A |
+| 밀도 | `KOJA.matcher.shouldSelect(candidateIndex, density)` → `boolean` · 누적 quota 기반 결정적 비율 | A |
 | 본문 영역 | `KOJA.scope.getRoot(doc)` → `Element\|null`<br>`KOJA.scope.eachTextNode(root, fn)` | B |
 | 치환·복원 | `KOJA.replacer.applyMatches(textNode, picks)` → `number`<br>`KOJA.replacer.restoreAll(root)` → `number` | B |
 | 툴팁 | `KOJA.tooltip.init()` (멱등) | B |
@@ -146,7 +151,7 @@ python -m http.server 8000        # file:// 로 열면 콘텐츠 스크립트가
 2. `http://localhost:8000/demo/sample.html` 에서 일본어 단어가 보인다
 3. 콘솔 빨간 줄 **0**
 
-## 지금 상태 (2026-08-19, D1 진행 중 — PR #4 병합 이후)
+## 당시 상태 snapshot (2026-08-19, D1 진행 중 — PR #4 병합 이후)
 
 | | 있다 | 없다 |
 |---|---|---|

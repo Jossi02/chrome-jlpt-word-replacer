@@ -1,5 +1,8 @@
 # CHANGELOG-INBOX — 남의 소유 파일을 건드렸을 때 남기는 쪽지함
 
+> 이 폴더는 2026-08-19의 3인 lane 협업 tooling 기록이다. `owner-guard.mjs`는 보존하지만 현재
+> 공용 `.claude/settings.json`에는 등록돼 있지 않으므로 새 clone에서 자동 실행되지 않는다.
+
 ## 왜 있나
 
 `.claude/settings.local.json` 의 `deny` 가 남의 파일 수정을 **막는다.**
@@ -14,7 +17,7 @@
 
 ## 어떻게 만들어지나
 
-`.claude/hooks/owner-guard.mjs` 훅이 **자동으로** 만든다.
+당시에는 `.claude/hooks/owner-guard.mjs` 훅이 자동으로 만들도록 설계했다.
 `.claude/owners.json` 기준으로 내 레인 소유가 아닌 파일을 고치는 순간 여기에 `.md` 가 하나 생긴다.
 
 ```

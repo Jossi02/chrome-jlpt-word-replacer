@@ -1,5 +1,9 @@
 # D3-1 실측 기록 — 3사이트 (2026-08-19)
 
+> **Historical manual validation:** 당시 사용한 외부 뉴스 기사 `demo/backup/blog.html`과 위키백과
+> `demo/backup/wiki.html` snapshot은 2026-08-30 공개 hardening에서 current tree에서 제거했다.
+> 아래 측정 결과와 경로는 당시 검증 provenance로 보존한다.
+
 > 조건: 레벨 **N1** · 밀도 **100%** (가장 많이 치환되는 조건, plan.md D3-1 지시대로)
 > 방법: Claude in Chrome 브라우저 자동화로 3사이트 전체 순회. 실측자: Claude(통합자 @Jossi02 대행, 사용자 확인 하에 진행)
 > 사이트: ① `demo/sample.html` ② 위키백과 `ko.wikipedia.org/wiki/대한민국` (+ 로컬 백업 `demo/backup/wiki.html` 교차 확인) ③ `demo/backup/blog.html` (다음뉴스 여행기사)
@@ -75,7 +79,7 @@
 ## 담당자 서명
 
 - 오탐 1-1·1-2·1-3·1-4: **C** (@Jossi02) — 실측·수정 전부 Claude 대행, 사용자 확인 하에 진행. **D3-2 완료.**
-  - 단, 1-1(바람)의 실제 수정은 `src/matcher.js`·`tests/matcher.test.mjs`(A 소유 파일)를 건드렸다. **owner-guard 훅이 실제로는 발동하지 않았다** — `.claude/settings.json`의 `PostToolUse`에는 `post-edit-check.mjs`만 걸려 있고 `owner-guard.mjs`는 배선돼 있지 않음(CLAUDE.md 문서와 실제 설정이 어긋남, 통합자 확인 필요). 자동 기록이 없으므로 이 문서로 A에게 직접 통보할 것.
+  - 단, 1-1(바람)의 실제 수정은 `src/matcher.js`·`tests/matcher.test.mjs`(A 소유 파일)를 건드렸다. **owner-guard 훅이 실제로는 발동하지 않았다** — 당시 `.claude/settings.json`의 `PostToolUse`에는 `post-edit-check.mjs`만 걸려 있고 `owner-guard.mjs`는 배선돼 있지 않았다. 이후 공개 hardening은 owner guard를 historical opt-in tooling으로 명시했고, 자동 기록이 없었던 사실은 이 문서로 보존한다.
 - 표기 재검토 2-1(아주머니): **C** — 판단 보류, 급하지 않음.
 - 미탐 없음 — **A** 확인 불요.
 - 레이아웃 없음 / 콘솔에러 없음 — **B** 확인 불요.

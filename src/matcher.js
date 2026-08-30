@@ -75,15 +75,16 @@ window.KOJA = window.KOJA || {};
     return out;
   }
 
-  function densityStep(density) {
-    if (density >= 100) return 1;
-    if (density <= 0) return Infinity;
-    return Math.max(1, Math.round(100 / density));
+  function shouldSelect(candidateIndex, density) {
+    if (density <= 0) return false;
+    if (density >= 100) return true;
+    return Math.ceil((candidateIndex + 1) * density / 100) >
+           Math.ceil(candidateIndex * density / 100);
   }
 
   window.KOJA.matcher = {
     compile: compile,
     findMatches: findMatches,
-    densityStep: densityStep
+    shouldSelect: shouldSelect
   };
 })();

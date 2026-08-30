@@ -1,5 +1,8 @@
 # KoJa 구현 계획 (plan.md)
 
+> **Historical development artifact (2026-08-19):** 아래 명령·코드·경로·수치는 당시 구현 계획과
+> 실행 순서를 보존한다. 현재 동작과 검증 수치는 코드, `README.md`, `SPEC.md`의 hardening note를 따른다.
+
 > **작업자에게:** 이 문서는 [SPEC.md](SPEC.md)와 **함께** 읽는다. 계획은 SPEC을 근거로 논증하므로 SPEC이 정답이다. 둘이 어긋나면 SPEC이 이긴다.
 > 각 단계는 체크박스(`- [ ]`)다. 잘게 쪼갠 실행용 목록은 [tasks.md](tasks.md)에 있다.
 
